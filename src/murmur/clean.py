@@ -55,7 +55,10 @@ def clean(
         if mid in seen_ids:
             continue
         text = remove_urls(strip_html(item.text)).strip()
-        if looks_like_spam(text) or not is_relevant(text, patterns.get(item.company, [])):
+        if looks_like_spam(text):
+            continue
+        # News comes from phrase searches, so a headline needn't repeat the name; posts must mention it.
+        if item.source != "news" and not is_relevant(text, patterns.get(item.company, [])):
             continue
         if any(x in fold(text) for x in excludes.get(item.company, [])):
             continue
