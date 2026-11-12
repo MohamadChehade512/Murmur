@@ -11,6 +11,7 @@ from .stopwords import ARABIC, ENGLISH
 from .text import fold, normalize_arabic
 
 _TOKEN = re.compile(r"[^\W\d_][\w'’-]*", re.UNICODE)
+_POSSESSIVE = re.compile(r"['’]s$")
 MAX_TERMS_PER_MENTION = 12
 _ARABIC_STOP = {normalize_arabic(w) for w in ARABIC}
 
@@ -35,7 +36,7 @@ def _keep(token: str, lang: str, exclude: set[str]) -> bool:
 def extract_terms(text: str, lang: str, company: Company) -> list[str]:
     """Unique terms in one text: single words plus two-word phrases of adjacent kept words."""
     exclude = _company_words(company)
-    tokens = [fold(t).strip("'’-") for t in _TOKEN.findall(text)]
+    tokens = [_POSSESSIVE.sub("", fold(t)).strip("'’-") for t in _TOKEN.findall(text)]
     keep = [_keep(t, lang, exclude) for t in tokens]
     terms: list[str] = []
     for i, t in enumerate(tokens):
