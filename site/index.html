@@ -70,7 +70,7 @@ footer p { margin: 0; max-width: 72ch; }
         <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#5b4bff"/><path d="M7 19c2-5 4-5 6 0s4 5 6 0 4-5 6 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="25" cy="10" r="2.4" fill="#fff"/></svg>
         Murmur
       </h1>
-      <p class="lede">What people are saying about three companies across news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised every hour.</p>
+      <p class="lede">What people are saying about three companies across the news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised every hour.</p>
     </div>
     <p class="status" id="status">Loading…</p>
   </header>
@@ -156,7 +156,8 @@ function company(c) {
     el('div', {}, el('h3', {}, 'Words people use'), terms(c.top_terms.en, false)),
     el('div', {}, el('h3', {}, 'بالعربية'), terms(c.top_terms.ar, true)),
     el('div', {}, el('h3', {}, 'Where'), el('p', { class: 'mix' },
-      `News ${fmt.format(t.by_source.news)}`, `Hacker News ${fmt.format(t.by_source.hn)}`, `Bluesky ${fmt.format(t.by_source.bluesky)}`), pageviews(c)),
+      el('span', {}, `News ${fmt.format(t.by_source.news)}`), el('span', {}, `Hacker News ${fmt.format(t.by_source.hn)}`),
+      el('span', {}, `Bluesky ${fmt.format(t.by_source.bluesky)}`)), pageviews(c)),
     el('div', {}, el('h3', {}, 'Latest headlines'), c.headlines.length
       ? el('ul', { class: 'news' }, c.headlines.slice(0, 4).map((h) => el('li', {},
           el('span', { class: `s ${h.sentiment || ''}`, title: h.sentiment || 'not scored' }),
