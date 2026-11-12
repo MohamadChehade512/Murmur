@@ -74,7 +74,10 @@ def _company_summary(company: Company, mentions: list[Mention], pageviews: list[
             for day in days
         ],
         "hourly": [
-            {"hour": (start_hour + timedelta(hours=i)).isoformat(), "mentions": hourly[start_hour + timedelta(hours=i)]}
+            {
+                "hour": (start_hour + timedelta(hours=i)).isoformat(),
+                "mentions": hourly[start_hour + timedelta(hours=i)],
+            }
             for i in range(HOURS)
         ],
         "top_terms": {lang: [{"term": t, "count": n} for t, n in terms[lang]] for lang in LANGS},

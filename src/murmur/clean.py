@@ -30,7 +30,9 @@ def looks_like_spam(text: str) -> bool:
     return text.count("#") > MAX_HASHTAGS or len(text) < MIN_CHARS
 
 
-def clean(raw: Iterable[RawItem], companies: list[Company], known_ids: set[str] | None = None) -> list[RawItem]:
+def clean(
+    raw: Iterable[RawItem], companies: list[Company], known_ids: set[str] | None = None
+) -> list[RawItem]:
     """Strips markup, fills in language, drops spam and off-topic items, removes duplicates.
 
     Duplicates are caught by id (same post twice) and by text (the same post copied across accounts).

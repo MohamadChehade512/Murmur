@@ -36,3 +36,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Stop words read better as a block of text than as a list literal.
+"src/murmur/stopwords.py" = ["SIM905"]
