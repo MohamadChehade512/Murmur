@@ -21,6 +21,11 @@ def test_arabic_spelling_variants_count_once_and_keep_real_spelling():
     assert top_terms(docs, limit=3) == [("أمنية", 3)]
 
 
+def test_phrase_hides_its_words_even_when_a_word_ranks_higher():
+    docs = [["musk", "elon musk"], ["musk", "elon musk"], ["musk"], ["musk"]]
+    assert top_terms(docs, limit=3) == [("elon musk", 2)]
+
+
 def test_top_terms_prefers_phrases_and_needs_two_mentions():
     docs = [["battery", "range", "battery range"], ["battery", "range", "battery range"], ["recall"]]
     assert top_terms(docs, limit=5) == [("battery range", 2)]

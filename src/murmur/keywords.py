@@ -67,14 +67,10 @@ def top_terms(term_lists: Iterable[list[str]], limit: int = 12, min_docs: int = 
         ((t, n) for t, n in df.items() if n >= min_docs),
         key=lambda tn: (-(tn[1] * (1.5 if " " in tn[0] else 1)), tn[0]),
     )
-    chosen: list[tuple[str, int]] = []
-    covered: set[str] = set()
-    for term, n in ranked:
-        if " " not in term and term in covered:
-            continue
-        if " " in term:
-            covered.update(term.split())
-        chosen.append((spellings[term].most_common(1)[0][0], n))
-        if len(chosen) == limit:
-            break
+    # Phrases among the top candidates hide the single words inside them, whichever ranked first.
+    candidates = ranked[: limit * 3]
+    covered = {w for t, _ in candidates if " " in t for w in t.split()}
+    chosen = [(spellings[t].most_common(1)[0][0], n) for t, n in candidates if " " in t or t not in covered][
+        :limit
+    ]
     return chosen
