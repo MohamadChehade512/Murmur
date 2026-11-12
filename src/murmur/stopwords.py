@@ -16,6 +16,7 @@ amp com http https www html quot gt lt nbsp rt
 going know think thing things people time year years day days back first last good bad well
 lot right sure actually probably maybe something anything nothing someone anyone everyone
 two three four five per around today week month news report reports according
+free app apps tech company companies buy post posts video link check thread anyone's
 """.split()
 )
 
