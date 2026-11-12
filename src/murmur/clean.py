@@ -26,8 +26,13 @@ def is_relevant(text: str, patterns: list[re.Pattern]) -> bool:
     return any(p.search(folded) for p in patterns)
 
 
+# Listings, giveaways and bots that post song titles add noise for every company.
+SPAM_PHRASES = ("#nowplaying", "now playing", "for sale (", "giveaway", "promo code", "use code")
+
+
 def looks_like_spam(text: str) -> bool:
-    return text.count("#") > MAX_HASHTAGS or len(text) < MIN_CHARS
+    lowered = text.casefold()
+    return text.count("#") > MAX_HASHTAGS or len(text) < MIN_CHARS or any(p in lowered for p in SPAM_PHRASES)
 
 
 def clean(
@@ -41,6 +46,7 @@ def clean(
     from .models import mention_id
 
     patterns = {c.id: _alias_patterns(c) for c in companies}
+    excludes = {c.id: [fold(x) for x in c.exclude] for c in companies}
     seen_ids = set(known_ids or ())
     seen_text: set[tuple[str, str]] = set()
     out: list[RawItem] = []
@@ -50,6 +56,8 @@ def clean(
             continue
         text = remove_urls(strip_html(item.text)).strip()
         if looks_like_spam(text) or not is_relevant(text, patterns.get(item.company, [])):
+            continue
+        if any(x in fold(text) for x in excludes.get(item.company, [])):
             continue
         key = (item.company, fold(text)[:200])
         if key in seen_text:

@@ -17,9 +17,10 @@ class Company:
     name: str
     color: str
     aliases: tuple[str, ...]
-    news: dict[str, str]
+    news: str
     search: tuple[str, ...]
     wikipedia: str | None = None
+    exclude: tuple[str, ...] = ()
 
 
 @dataclass

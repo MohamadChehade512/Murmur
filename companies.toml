@@ -1,28 +1,30 @@
 # Companies Murmur follows. Edit this file to track different ones.
 #
 # id          short slug, used in URLs and file names
-# aliases     words that must appear for a post to count as a mention (case-insensitive)
-# news        GDELT query per language (https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/)
-# search      plain search terms for Hacker News and Bluesky
+# aliases     a post must contain one of these to count (case-insensitive; whole words for Latin script)
+# exclude     phrases that mark a post as off-topic for this company
+# news        GDELT query, matched in English and Arabic sources
+#             (https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/). Quote phrases of 2+ words only.
+# search      search terms for Hacker News (English only) and Bluesky
 # wikipedia   English Wikipedia article title, for page views
 
 [[company]]
 id = "apple"
 name = "Apple"
 color = "#0A84FF"
-aliases = ["Apple", "iPhone", "iPad", "MacBook", "Tim Cook", "آبل", "أبل", "ايفون", "آيفون"]
-news.en = '("Apple Inc" OR iPhone OR "Tim Cook" OR "Apple shares")'
-news.ar = '("آبل" OR "آيفون")'
-search = ["Apple", "آبل"]
+aliases = ["Apple", "iPhone", "iPad", "MacBook", "iOS", "Tim Cook", "آبل", "أبل", "ايفون", "آيفون"]
+exclude = ["apple music", "apple pie", "apple cider", "big apple", "apple tree", "apples"]
+news = '("Apple Inc" OR iPhone OR "Tim Cook" OR "Apple shares" OR آيفون OR "شركة آبل")'
+search = ["Apple", "iPhone", "آبل"]
 wikipedia = "Apple Inc."
 
 [[company]]
 id = "tesla"
 name = "Tesla"
 color = "#E31937"
-aliases = ["Tesla", "Cybertruck", "Model Y", "Model 3", "تسلا"]
-news.en = '(Tesla OR Cybertruck)'
-news.ar = '"تسلا"'
+aliases = ["Tesla", "Cybertruck", "Model Y", "Model 3", "Robotaxi", "تسلا"]
+exclude = ["nikola tesla", "tesla coil"]
+news = '(Tesla OR Cybertruck OR تسلا)'
 search = ["Tesla", "تسلا"]
 wikipedia = "Tesla, Inc."
 
@@ -30,8 +32,11 @@ wikipedia = "Tesla, Inc."
 id = "emirates"
 name = "Emirates"
 color = "#C8A04A"
-aliases = ["Emirates airline", "Emirates Airlines", "Fly Emirates", "Emirates flight", "Emirates A380", "طيران الإمارات"]
-news.en = '("Emirates airline" OR "Emirates Airlines" OR "Emirates flight")'
-news.ar = '"طيران الإمارات"'
-search = ["Emirates airline", "طيران الإمارات"]
+aliases = [
+  "Emirates airline", "Emirates Airlines", "Emirates flight", "Emirates flights", "fly Emirates",
+  "flew Emirates", "flying Emirates", "Emirates A380", "Emirates business class", "Emirates first class",
+  "Emirates lounge", "Emirates Skywards", "Skywards", "@emirates", "طيران الإمارات", "الإمارات للطيران",
+]
+news = '("Emirates airline" OR "Emirates Airlines" OR "Emirates flight" OR "Emirates Group" OR "طيران الإمارات")'
+search = ["Emirates airline", "Emirates flight", "flew Emirates", "Skywards", "طيران الإمارات"]
 wikipedia = "Emirates (airline)"

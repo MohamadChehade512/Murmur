@@ -9,16 +9,23 @@ def test_gdelt_parses_articles_and_skips_bad_rows():
                 "title": " Tesla opens plant ",
                 "seendate": "20261112T040000Z",
                 "domain": "a.com",
+                "language": "English",
+            },
+            {
+                "url": "https://a.com/4",
+                "title": "تسلا تفتتح مصنعا",
+                "seendate": "20261112T050000Z",
+                "language": "Arabic",
             },
             {"url": "https://a.com/2", "title": "", "seendate": "20261112T040000Z"},
             {"url": "https://a.com/3", "title": "No date"},
         ]
     }
-    items = gdelt.parse(payload, "tesla", "en")
-    assert len(items) == 1
+    items = gdelt.parse(payload, "tesla")
+    assert [i.lang for i in items] == ["en", "ar"]
     assert items[0].title == "Tesla opens plant"
     assert items[0].published_at.hour == 4
-    assert gdelt.parse(None, "tesla", "en") == []
+    assert gdelt.parse(None, "tesla") == []
 
 
 def test_hackernews_uses_title_or_comment():

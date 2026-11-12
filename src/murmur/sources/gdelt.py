@@ -12,11 +12,13 @@ from ..models import Company, RawItem
 
 API = "https://api.gdeltproject.org/api/v2/doc/doc"
 HOST = "api.gdeltproject.org"
-MIN_INTERVAL = 5.5
-LANGS = {"en": "english", "ar": "arabic"}
+MIN_INTERVAL = 6.0
+# One query per company covers both languages, which halves the requests.
+LANG_FILTER = "(sourcelang:english OR sourcelang:arabic)"
+LANG_CODES = {"English": "en", "Arabic": "ar"}
 
 
-def parse(payload: dict | None, company: str, lang: str) -> list[RawItem]:
+def parse(payload: dict | None, company: str) -> list[RawItem]:
     items = []
     for a in (payload or {}).get("articles", []):
         url, title = a.get("url"), (a.get("title") or "").strip()
@@ -36,27 +38,24 @@ def parse(payload: dict | None, company: str, lang: str) -> list[RawItem]:
                 text=title,
                 title=title,
                 domain=a.get("domain"),
-                lang=lang,
+                lang=LANG_CODES.get(a.get("language", ""), "other"),
             )
         )
     return items
 
 
 def collect(client: PoliteClient, company: Company, hours: int) -> list[RawItem]:
-    items: list[RawItem] = []
-    for lang, query in company.news.items():
-        if lang not in LANGS:
-            continue
-        payload = client.get_json(
-            API,
-            {
-                "query": f"{query} sourcelang:{LANGS[lang]}",
-                "mode": "artlist",
-                "format": "json",
-                "maxrecords": 100,
-                "timespan": f"{hours}h",
-                "sort": "datedesc",
-            },
-        )
-        items += parse(payload, company.id, lang)
-    return items
+    if not company.news:
+        return []
+    payload = client.get_json(
+        API,
+        {
+            "query": f"{company.news} {LANG_FILTER}",
+            "mode": "artlist",
+            "format": "json",
+            "maxrecords": 150,
+            "timespan": f"{hours}h",
+            "sort": "datedesc",
+        },
+    )
+    return parse(payload, company.id)

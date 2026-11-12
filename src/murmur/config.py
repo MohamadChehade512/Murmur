@@ -21,9 +21,10 @@ def load_companies(path: Path = DEFAULT_PATH) -> list[Company]:
                 name=c["name"],
                 color=c.get("color", "#888888"),
                 aliases=tuple(c["aliases"]),
-                news=dict(c.get("news", {})),
+                news=c.get("news", ""),
                 search=tuple(c.get("search", [])),
                 wikipedia=c.get("wikipedia"),
+                exclude=tuple(c.get("exclude", [])),
             )
         )
     ids = [c.id for c in companies]

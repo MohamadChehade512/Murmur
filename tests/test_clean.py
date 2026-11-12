@@ -18,7 +18,7 @@ def test_detects_arabic_and_english():
 def test_drops_off_topic_spam_and_duplicates(companies):
     items = [
         raw(nid="1", text="Tesla deliveries beat expectations this quarter"),
-        raw(nid="2", text="Nikola Tesla was an inventor"),  # still mentions Tesla: kept (word match)
+        raw(nid="2", text="Tesla shares slip after the earnings call"),
         raw(nid="3", text="Ford earnings are out today and look fine"),  # no alias
         raw(nid="4", text="Tesla deliveries beat expectations this quarter"),  # same text, other id
         raw(nid="5", text="#tesla #ev #cars #musk #stock #buy #now #moon Tesla"),  # hashtag spam
@@ -26,6 +26,15 @@ def test_drops_off_topic_spam_and_duplicates(companies):
     ]
     kept = clean(items, companies)
     assert [i.native_id for i in kept] == ["1", "2"]
+
+
+def test_drops_company_excludes_and_known_spam(companies):
+    items = [
+        raw(nid="20", text="Nikola Tesla was a brilliant inventor"),
+        raw(company="apple", nid="21", text="#nowplaying a great song on Apple Music"),
+        raw(company="apple", nid="22", text="For Sale ( 10 Pieces ) New Apple iPhone"),
+    ]
+    assert clean(items, companies) == []
 
 
 def test_skips_already_stored_ids(companies):
