@@ -15,7 +15,7 @@ from .http import PoliteClient
 from .keywords import extract_terms
 from .models import Company, Mention, RawItem, mention_id
 from .sentiment import Backend
-from .sources import bluesky, gdelt, hackernews, wikipedia
+from .sources import bluesky, gdelt, google_news, hackernews, wikipedia
 from .store import Store
 
 log = logging.getLogger(__name__)
@@ -33,7 +33,12 @@ class RunStats:
 def collect_all(client: PoliteClient, companies: list[Company], hours: int) -> list[RawItem]:
     raw: list[RawItem] = []
     for c in companies:
-        for name, fn in (("news", gdelt.collect), ("hn", hackernews.collect), ("bluesky", bluesky.collect)):
+        for name, fn in (
+            ("gdelt", gdelt.collect),
+            ("gnews", google_news.collect),
+            ("hn", hackernews.collect),
+            ("bluesky", bluesky.collect),
+        ):
             found = fn(client, c, hours)
             log.info("%-8s %-7s %4d items", c.id, name, len(found))
             raw += found
@@ -79,7 +84,9 @@ def run(
     client: PoliteClient | None = None,
     now: datetime | None = None,
 ) -> RunStats:
-    client = client or PoliteClient(min_interval={gdelt.HOST: gdelt.MIN_INTERVAL})
+    client = client or PoliteClient(
+        min_interval={gdelt.HOST: gdelt.MIN_INTERVAL, google_news.HOST: google_news.MIN_INTERVAL}
+    )
     stats = RunStats()
 
     raw = collect_all(client, companies, hours)

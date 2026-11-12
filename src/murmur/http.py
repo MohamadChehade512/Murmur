@@ -34,7 +34,7 @@ class PoliteClient:
         if wait > 0:
             time.sleep(wait)
 
-    def get_json(self, url: str, params: dict | None = None) -> dict | None:
+    def _get(self, url: str, params: dict | None = None) -> requests.Response | None:
         host = urlparse(url).netloc
         for attempt in range(RATE_LIMIT_RETRIES + 1):
             self._throttle(host)
@@ -54,9 +54,23 @@ class PoliteClient:
                 continue
             try:
                 resp.raise_for_status()
-                return resp.json()
-            except (requests.RequestException, ValueError) as exc:
+            except requests.RequestException as exc:
                 # One failing source should never take down the whole run.
                 log.warning("GET %s failed: %s", host, exc)
                 return None
+            return resp
         return None
+
+    def get_json(self, url: str, params: dict | None = None) -> dict | None:
+        resp = self._get(url, params)
+        if resp is None:
+            return None
+        try:
+            return resp.json()
+        except ValueError as exc:
+            log.warning("GET %s returned invalid JSON: %s", urlparse(url).netloc, exc)
+            return None
+
+    def get_text(self, url: str, params: dict | None = None) -> str | None:
+        resp = self._get(url, params)
+        return resp.text if resp is not None else None

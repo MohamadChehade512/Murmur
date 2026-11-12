@@ -25,6 +25,7 @@ def load_companies(path: Path = DEFAULT_PATH) -> list[Company]:
                 search=tuple(c.get("search", [])),
                 wikipedia=c.get("wikipedia"),
                 exclude=tuple(c.get("exclude", [])),
+                headlines=dict(c.get("headlines", {})),
             )
         )
     ids = [c.id for c in companies]

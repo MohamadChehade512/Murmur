@@ -12,7 +12,7 @@ SCHEMA_VERSION = 1
 WINDOW_DAYS = 7
 HOURS = 48
 SOURCES = [
-    {"id": "news", "label": "News (GDELT)", "url": "https://www.gdeltproject.org/"},
+    {"id": "news", "label": "News (GDELT and Google News)", "url": "https://www.gdeltproject.org/"},
     {"id": "hn", "label": "Hacker News", "url": "https://news.ycombinator.com/"},
     {"id": "bluesky", "label": "Bluesky", "url": "https://bsky.app/"},
 ]

@@ -21,6 +21,7 @@ class Company:
     search: tuple[str, ...]
     wikipedia: str | None = None
     exclude: tuple[str, ...] = ()
+    headlines: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass

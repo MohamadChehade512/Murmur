@@ -5,6 +5,7 @@
 # exclude     phrases that mark a post as off-topic for this company
 # news        GDELT query, matched in English and Arabic sources
 #             (https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/). Quote phrases of 2+ words only.
+# headlines   Google News search per language (en, ar)
 # search      search terms for Hacker News (English only) and Bluesky
 # wikipedia   English Wikipedia article title, for page views
 
@@ -15,6 +16,8 @@ color = "#0A84FF"
 aliases = ["Apple", "iPhone", "iPad", "MacBook", "iOS", "Tim Cook", "آبل", "أبل", "ايفون", "آيفون"]
 exclude = ["apple music", "apple pie", "apple cider", "big apple", "apple tree", "apples"]
 news = '("Apple Inc" OR iPhone OR "Tim Cook" OR "Apple shares" OR آيفون OR "شركة آبل")'
+headlines.en = '"Apple Inc" OR iPhone OR "Tim Cook"'
+headlines.ar = '"شركة آبل" OR آيفون'
 search = ["Apple", "iPhone", "آبل"]
 wikipedia = "Apple Inc."
 
@@ -25,6 +28,8 @@ color = "#E31937"
 aliases = ["Tesla", "Cybertruck", "Model Y", "Model 3", "Robotaxi", "تسلا"]
 exclude = ["nikola tesla", "tesla coil"]
 news = '(Tesla OR Cybertruck OR تسلا)'
+headlines.en = 'Tesla OR Cybertruck'
+headlines.ar = 'تسلا'
 search = ["Tesla", "تسلا"]
 wikipedia = "Tesla, Inc."
 
@@ -38,5 +43,7 @@ aliases = [
   "Emirates lounge", "Emirates Skywards", "Skywards", "@emirates", "طيران الإمارات", "الإمارات للطيران",
 ]
 news = '("Emirates airline" OR "Emirates Airlines" OR "Emirates flight" OR "Emirates Group" OR "طيران الإمارات")'
+headlines.en = '"Emirates airline" OR "Emirates flight" OR "Emirates Group"'
+headlines.ar = '"طيران الإمارات"'
 search = ["Emirates airline", "Emirates flight", "flew Emirates", "Skywards", "طيران الإمارات"]
 wikipedia = "Emirates (airline)"
