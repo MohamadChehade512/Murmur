@@ -1,7 +1,7 @@
 # Murmur
 
-**Live media monitoring, free to run.** Murmur follows three companies across news, Hacker News and
-Bluesky, in English and Arabic, and publishes an hourly dashboard of how often they are mentioned,
+**Live media monitoring, free to run.** Murmur follows three companies across news (GDELT and Google
+News), Hacker News and Bluesky, in English and Arabic, and publishes an hourly dashboard of how often they are mentioned,
 how people feel about them, and the words people use.
 
 **Dashboard:** https://mohamadchehade512.github.io/Murmur/
@@ -13,7 +13,7 @@ how people feel about them, and the words people use.
 ## How it works
 
 ```
-GDELT, Hacker News, Bluesky ──► collect ──► clean ──► score ──► keywords ──► data branch (30 days)
+GDELT, Google News, Hacker News, Bluesky ──► collect ──► clean ──► score ──► keywords ──► data branch (30 days)
 Wikipedia page views ─────────────────────────────────────────────────────► summarise ──► GitHub Pages
 ```
 
@@ -50,8 +50,8 @@ murmur run --sentiment model
 ## Track different companies
 
 Edit [`companies.toml`](companies.toml): each company has a name, colour, aliases that must appear
-in a post, phrases to exclude, one GDELT news query (matched in English and Arabic sources), search
-terms and a Wikipedia article.
+in a post, phrases to exclude, a GDELT news query (matched in English and Arabic sources), Google
+News searches per language, search terms and a Wikipedia article.
 
 ## Project layout
 

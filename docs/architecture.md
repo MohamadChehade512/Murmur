@@ -6,7 +6,7 @@ output is a static site and one JSON file on GitHub Pages.
 ```mermaid
 flowchart LR
   subgraph Sources
-    G[GDELT news<br/>English + Arabic]
+    G[GDELT + Google News<br/>English + Arabic]
     H[Hacker News<br/>Algolia API]
     B[Bluesky<br/>public search]
     W[Wikipedia<br/>page views]
@@ -29,7 +29,7 @@ flowchart LR
 | Stage | Module | What it does |
 | --- | --- | --- |
 | Collect | `sources/*` | One collector per source. Each returns `RawItem`s and never raises: a failing source is logged and skipped. |
-| Clean | `clean.py`, `text.py` | Strips HTML and links, detects English or Arabic by script, keeps only items that mention a company alias, drops hashtag spam, and removes duplicates by id and by text. |
+| Clean | `clean.py`, `text.py` | Strips HTML and links, detects English or Arabic by script, keeps posts that mention a company alias (news already comes from phrase searches), drops spam and per-company exclusions, and removes duplicates by id and by text. |
 | Score | `sentiment.py` | `model` backend: a multilingual DistilBERT that labels English and Arabic text positive, neutral or negative. `lexicon` backend: VADER, English only, used in tests and as a fallback. |
 | Keywords | `keywords.py` | Single words plus two-word phrases, with English and Arabic stop words removed. Ranked by how many mentions use them. |
 | Store | `store.py` | One gzipped JSON Lines file per day on the `data` branch, kept for 30 days. Files are written deterministically so unchanged days don't create git diffs. |

@@ -6,6 +6,7 @@ against a site's terms, log in as anyone, or collect private data.
 | Source | Access | Limits we respect |
 | --- | --- | --- |
 | [GDELT DOC 2.0](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) | Free, no key | One request every 5 seconds (enforced in `http.py`). |
+| [Google News RSS](https://news.google.com/) | Free, no key | One request every 2 seconds, a few per hour. Only headlines and links. |
 | [Hacker News via Algolia](https://hn.algolia.com/api) | Free, no key | A handful of requests per hour. |
 | [Bluesky search](https://docs.bsky.app/docs/api/app-bsky-feed-search-posts) | Free, no login on `api.bsky.app` | A handful of requests per hour. |
 | [Wikimedia page views](https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/) | Free, no key | Descriptive User-Agent, one request per company per hour. |
