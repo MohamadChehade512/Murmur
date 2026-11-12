@@ -14,7 +14,6 @@ permissions:
   contents: write # push to the data branch
   pages: write
   id-token: write
-  actions: write # keepalive: re-enables the schedule so GitHub doesn't pause it after 60 quiet days
 
 concurrency:
   group: collect
@@ -84,7 +83,3 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v4
 
-      - name: Keep the schedule alive
-        uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          use_api: true

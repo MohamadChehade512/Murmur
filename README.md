@@ -24,6 +24,12 @@ model that reads English and Arabic, running on the Actions runner's CPU.
 - [Architecture](docs/architecture.md): stages, modules, and the `summary.json` schema
 - [Data sources and ethics](docs/data-and-ethics.md): what is collected, what is stored, and limits
 
+## Keeping the schedule running
+
+GitHub pauses scheduled workflows in public repositories after 60 days without activity on the
+default branch. If that happens, open **Actions → Collect and publish → Enable workflow**, or push
+any commit to `main`.
+
 ## Cost
 
 $0. GitHub Actions and Pages are free for public repositories, every source is free and keyless,
