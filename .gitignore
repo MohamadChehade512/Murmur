@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+# Pipeline output: the data lives on the `data` branch, the site is built by CI.
+/data/
+/public/
+.DS_Store

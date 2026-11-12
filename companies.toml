@@ -1,0 +1,37 @@
+# Companies Murmur follows. Edit this file to track different ones.
+#
+# id          short slug, used in URLs and file names
+# aliases     words that must appear for a post to count as a mention (case-insensitive)
+# news        GDELT query per language (https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/)
+# search      plain search terms for Hacker News and Bluesky
+# wikipedia   English Wikipedia article title, for page views
+
+[[company]]
+id = "apple"
+name = "Apple"
+color = "#0A84FF"
+aliases = ["Apple", "iPhone", "iPad", "MacBook", "Tim Cook", "آبل", "أبل", "ايفون", "آيفون"]
+news.en = '("Apple Inc" OR iPhone OR "Tim Cook" OR "Apple shares")'
+news.ar = '("آبل" OR "آيفون")'
+search = ["Apple", "آبل"]
+wikipedia = "Apple Inc."
+
+[[company]]
+id = "tesla"
+name = "Tesla"
+color = "#E31937"
+aliases = ["Tesla", "Cybertruck", "Model Y", "Model 3", "تسلا"]
+news.en = '(Tesla OR Cybertruck)'
+news.ar = '"تسلا"'
+search = ["Tesla", "تسلا"]
+wikipedia = "Tesla, Inc."
+
+[[company]]
+id = "emirates"
+name = "Emirates"
+color = "#C8A04A"
+aliases = ["Emirates airline", "Emirates Airlines", "Fly Emirates", "Emirates flight", "Emirates A380", "طيران الإمارات"]
+news.en = '("Emirates airline" OR "Emirates Airlines" OR "Emirates flight")'
+news.ar = '"طيران الإمارات"'
+search = ["Emirates airline", "طيران الإمارات"]
+wikipedia = "Emirates (airline)"

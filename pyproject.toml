@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "murmur"
+version = "0.1.0"
+description = "A small, free-to-run media monitoring pipeline: who is talking about a company, how they feel, and what words they use."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Mohamad Chehade" }]
+dependencies = [
+  "requests>=2.31",
+  "vaderSentiment>=3.3.2",
+]
+
+[project.optional-dependencies]
+# Multilingual sentiment model (English and Arabic). Install torch from the CPU index first.
+model = ["transformers>=4.44", "torch>=2.3"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+murmur = "murmur.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
