@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Murmur | Live media monitoring</title>
+<meta name="description" content="What people say about Apple, Tesla and Emirates across news, Hacker News and Bluesky, in English and Arabic. Updated hourly.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #0e1116; --ink-2: #3d4350; --muted: #626a78; --line: #e3e6eb;
+  --pos: #12a37a; --neu: #b4bcc8; --neg: #d6455d; --accent: #5b4bff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0d1014; --panel: #151a20; --ink: #eef1f5; --ink-2: #c3c9d3; --muted: #8c95a3; --line: #252c35; --neu: #4b5563; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: inherit; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 32px 16px 64px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.02em; display: flex; align-items: center; gap: 12px; }
+h1 svg { flex: none; }
+.lede { margin: 6px 0 0; color: var(--ink-2); max-width: 62ch; }
+.status { font-size: 13px; color: var(--muted); text-align: right; }
+.status b { color: var(--ink); font-weight: 600; }
+.live { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--pos); margin-right: 6px; box-shadow: 0 0 0 0 var(--pos); animation: pulse 2.4s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pos) 60%, transparent); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
+@media (prefers-reduced-motion: reduce) { .live { animation: none; } }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.card h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+.dot { width: 12px; height: 12px; border-radius: 4px; background: var(--c); }
+.headline-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.count { font-size: 13px; color: var(--muted); }
+.count b { font-size: 22px; color: var(--ink); font-weight: 650; margin-right: 4px; }
+h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--line); }
+.bar span { display: block; height: 100%; }
+.sent-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.terms { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.terms li { padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--c) 12%, transparent); color: var(--ink); font-size: 13px; }
+.terms li small { color: var(--muted); margin-left: 4px; }
+.terms[dir="rtl"] li { font-size: 14px; }
+.empty { color: var(--muted); font-size: 13px; margin: 0; }
+.news { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.news li { display: grid; grid-template-columns: 8px 1fr; gap: 10px; align-items: baseline; }
+.news .s { width: 8px; height: 8px; border-radius: 50%; background: var(--neu); transform: translateY(-1px); }
+.news .s.positive { background: var(--pos); } .news .s.negative { background: var(--neg); }
+.news a { text-decoration: none; font-size: 14px; display: block; overflow-wrap: anywhere; }
+.news a:hover { text-decoration: underline; }
+.news small { color: var(--muted); font-size: 12px; }
+.mix { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-2); }
+
+footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+footer p { margin: 0; max-width: 72ch; }
+.error { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>
+        <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#5b4bff"/><path d="M7 19c2-5 4-5 6 0s4 5 6 0 4-5 6 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="25" cy="10" r="2.4" fill="#fff"/></svg>
+        Murmur
+      </h1>
+      <p class="lede">What people are saying about three companies across news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised every hour.</p>
+    </div>
+    <p class="status" id="status">Loading…</p>
+  </header>
+
+  <main id="app" class="grid" aria-live="polite"></main>
+
+  <footer>
+    <p>An open-source project by <a href="https://github.com/MohamadChehade512">Mohamad Chehade</a>. Built to show how media monitoring works. It is not affiliated with any of the companies shown. Sentiment is automated and approximate. Only links, scores and keywords are stored, never copies of people's posts.</p>
+    <p style="display:flex;gap:16px"><a href="https://github.com/MohamadChehade512/Murmur">Source on GitHub</a><a href="summary.json">summary.json</a></p>
+  </footer>
+</div>
+
+<script>
+const fmt = new Intl.NumberFormat('en');
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'style') n.style.cssText = v; else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) n.append(k.nodeType ? k : document.createTextNode(k));
+  return n;
+};
+const svg = (markup, vb) => { const d = el('div', { class: 'chart' }); d.innerHTML = `<svg viewBox="${vb}" role="presentation">${markup}</svg>`; return d; };
+const ago = (iso) => {
+  const mins = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const h = Math.round(mins / 60);
+  return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+};
+
+function dailyChart(c) {
+  const W = 320, H = 110, pad = 18, n = c.daily.length, bw = (W - (n - 1) * 6) / n;
+  const max = Math.max(1, ...c.daily.map((d) => d.mentions));
+  const bars = c.daily.map((d, i) => {
+    const x = i * (bw + 6), hEn = (d.en / max) * (H - pad), hAr = (d.ar / max) * (H - pad), hOt = (d.other / max) * (H - pad);
+    const day = new Date(d.date + 'T12:00:00Z').toLocaleDateString('en', { weekday: 'short' });
+    return `<rect x="${x}" y="${H - hEn}" width="${bw}" height="${hEn}" rx="3" fill="${c.color}"><title>${d.date}: ${d.mentions} mentions</title></rect>
+      <rect x="${x}" y="${H - hEn - hAr}" width="${bw}" height="${hAr}" rx="3" fill="${c.color}" opacity=".45"/>
+      <rect x="${x}" y="${H - hEn - hAr - hOt}" width="${bw}" height="${hOt}" rx="3" fill="var(--neu)"/>
+      <text x="${x + bw / 2}" y="${H + 14}" text-anchor="middle" font-size="10" fill="var(--muted)">${day}</text>`;
+  }).join('');
+  return svg(bars, `0 0 ${W} ${H + 16}`);
+}
+
+function hourlyChart(c) {
+  const W = 320, H = 46, pts = c.hourly, max = Math.max(1, ...pts.map((p) => p.mentions));
+  const xy = pts.map((p, i) => [(i / (pts.length - 1)) * W, H - (p.mentions / max) * (H - 4)]);
+  const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+  return svg(`<path d="${line} L${W} ${H} L0 ${H}Z" fill="${c.color}" opacity=".12"/><path d="${line}" fill="none" stroke="${c.color}" stroke-width="2" stroke-linejoin="round"/>`, `0 0 ${W} ${H}`);
+}
+
+function pageviews(c) {
+  const v = c.daily.map((d) => d.pageviews).filter((x) => x != null);
+  if (!v.length) return null;
+  return el('p', { class: 'mix' }, `Wikipedia: ${fmt.format(v.reduce((a, b) => a + b, 0))} page views in 7 days`);
+}
+
+function terms(list, rtl) {
+  if (!list.length) return el('p', { class: 'empty' }, 'Not enough mentions yet.');
+  return el('ul', { class: 'terms', dir: rtl ? 'rtl' : null, lang: rtl ? 'ar' : 'en' }, list.map((t) => el('li', {}, t.term, el('small', {}, String(t.count)))));
+}
+
+function company(c) {
+  const s = c.sentiment, t = c.totals;
+  const sentiment = s.scored
+    ? [el('div', { class: 'bar', role: 'img', 'aria-label': `${Math.round(s.positive * 100)}% positive, ${Math.round(s.neutral * 100)}% neutral, ${Math.round(s.negative * 100)}% negative` },
+        el('span', { style: `width:${s.positive * 100}%;background:var(--pos)` }),
+        el('span', { style: `width:${s.neutral * 100}%;background:var(--neu)` }),
+        el('span', { style: `width:${s.negative * 100}%;background:var(--neg)` })),
+       el('div', { class: 'sent-labels' }, el('span', {}, `${Math.round(s.positive * 100)}% positive`), el('span', {}, `${Math.round(s.negative * 100)}% negative`))]
+    : [el('p', { class: 'empty' }, 'No scored mentions yet.')];
+  return el('section', { class: 'card', style: `--c:${c.color}`, 'aria-labelledby': `h-${c.id}` },
+    el('div', { class: 'headline-row' },
+      el('h2', { id: `h-${c.id}` }, el('span', { class: 'dot' }), c.name),
+      el('span', { class: 'count' }, el('b', {}, fmt.format(t.mentions)), 'mentions, 7 days')),
+    el('div', {}, el('h3', {}, 'Mentions per day'), dailyChart(c),
+      el('div', { class: 'legend' }, el('span', {}, el('i', { style: `background:${c.color}` }), `English ${fmt.format(t.by_lang.en)}`),
+        el('span', {}, el('i', { style: `background:${c.color};opacity:.45` }), `Arabic ${fmt.format(t.by_lang.ar)}`),
+        el('span', {}, el('i', { style: 'background:var(--neu)' }), `Other ${fmt.format(t.by_lang.other)}`))),
+    el('div', {}, el('h3', {}, 'Last 48 hours'), hourlyChart(c)),
+    el('div', {}, el('h3', {}, 'How people feel'), ...sentiment),
+    el('div', {}, el('h3', {}, 'Words people use'), terms(c.top_terms.en, false)),
+    el('div', {}, el('h3', {}, 'بالعربية'), terms(c.top_terms.ar, true)),
+    el('div', {}, el('h3', {}, 'Where'), el('p', { class: 'mix' },
+      `News ${fmt.format(t.by_source.news)}`, `Hacker News ${fmt.format(t.by_source.hn)}`, `Bluesky ${fmt.format(t.by_source.bluesky)}`), pageviews(c)),
+    el('div', {}, el('h3', {}, 'Latest headlines'), c.headlines.length
+      ? el('ul', { class: 'news' }, c.headlines.slice(0, 4).map((h) => el('li', {},
+          el('span', { class: `s ${h.sentiment || ''}`, title: h.sentiment || 'not scored' }),
+          el('div', {}, el('a', { href: h.url, target: '_blank', rel: 'noopener', dir: 'auto', lang: h.lang }, h.title), el('small', {}, `${h.domain || ''}, ${ago(h.published_at)}`)))))
+      : el('p', { class: 'empty' }, 'No headlines yet.')));
+}
+
+async function load() {
+  const status = document.getElementById('status'), app = document.getElementById('app');
+  try {
+    const res = await fetch('summary.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    app.replaceChildren(...data.companies.map(company));
+    status.replaceChildren(el('span', { class: 'live' }), 'Updated ', el('b', {}, ago(data.generated_at)), `, sentiment by ${data.sentiment_backend === 'model' ? 'multilingual model' : 'English lexicon'}`);
+  } catch (e) {
+    app.replaceChildren(el('div', { class: 'error' }, 'The latest data could not be loaded. It refreshes every hour, so try again shortly.'));
+    status.textContent = '';
+  }
+}
+load();
+setInterval(load, 10 * 60 * 1000);
+</script>
+</body>
+</html>
