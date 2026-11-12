@@ -8,7 +8,7 @@ from collections.abc import Iterable
 
 from .models import Company
 from .stopwords import ARABIC, ENGLISH
-from .text import fold, normalize_arabic
+from .text import fold, normalize_arabic, surface
 
 _TOKEN = re.compile(r"[^\W\d_][\w'’-]*", re.UNICODE)
 _POSSESSIVE = re.compile(r"['’]s$")
@@ -24,19 +24,20 @@ def _company_words(company: Company) -> set[str]:
 
 
 def _keep(token: str, lang: str, exclude: set[str]) -> bool:
-    if token in exclude:
+    key = fold(token)
+    if key in exclude:
         return False
     if lang == "ar":
         # Arabic attaches "ال" (the) and "و" (and); check the bare word too.
-        bare = token[2:] if token.startswith("ال") else token
-        return len(bare) >= 2 and token not in _ARABIC_STOP and bare not in _ARABIC_STOP
-    return len(token) >= 3 and token not in ENGLISH
+        bare = key[2:] if key.startswith("ال") else key
+        return len(bare) >= 3 and key not in _ARABIC_STOP and bare not in _ARABIC_STOP
+    return len(key) >= 3 and key not in ENGLISH
 
 
 def extract_terms(text: str, lang: str, company: Company) -> list[str]:
     """Unique terms in one text: single words plus two-word phrases of adjacent kept words."""
     exclude = _company_words(company)
-    tokens = [_POSSESSIVE.sub("", fold(t)).strip("'’-") for t in _TOKEN.findall(text)]
+    tokens = [_POSSESSIVE.sub("", surface(t)).strip("'’-") for t in _TOKEN.findall(text)]
     keep = [_keep(t, lang, exclude) for t in tokens]
     terms: list[str] = []
     for i, t in enumerate(tokens):
@@ -49,10 +50,19 @@ def extract_terms(text: str, lang: str, company: Company) -> list[str]:
 
 
 def top_terms(term_lists: Iterable[list[str]], limit: int = 12, min_docs: int = 2) -> list[tuple[str, int]]:
-    """Ranks terms by how many mentions use them. A phrase hides the single words inside it."""
+    """Ranks terms by how many mentions use them. A phrase hides the single words inside it.
+
+    Spelling variants (أبل / ابل) count as one term, shown in their most common spelling.
+    """
     df: Counter[str] = Counter()
+    spellings: dict[str, Counter[str]] = {}
     for terms in term_lists:
-        df.update(set(terms))
+        keys = {}
+        for t in terms:
+            keys.setdefault(fold(t), t)
+        df.update(keys.keys())
+        for key, t in keys.items():
+            spellings.setdefault(key, Counter())[t] += 1
     ranked = sorted(
         ((t, n) for t, n in df.items() if n >= min_docs),
         key=lambda tn: (-(tn[1] * (1.5 if " " in tn[0] else 1)), tn[0]),
@@ -64,7 +74,7 @@ def top_terms(term_lists: Iterable[list[str]], limit: int = 12, min_docs: int = 
             continue
         if " " in term:
             covered.update(term.split())
-        chosen.append((term, n))
+        chosen.append((spellings[term].most_common(1)[0][0], n))
         if len(chosen) == limit:
             break
     return chosen

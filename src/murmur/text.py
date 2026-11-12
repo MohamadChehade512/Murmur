@@ -41,4 +41,10 @@ def detect_lang(text: str) -> str:
 
 
 def fold(text: str) -> str:
+    """Matching key: case-folded, with Arabic spelling variants folded together."""
     return unicodedata.normalize("NFKC", normalize_arabic(text)).casefold()
+
+
+def surface(text: str) -> str:
+    """Display form: case-folded, Arabic diacritics removed, but real spelling kept."""
+    return unicodedata.normalize("NFKC", _DIACRITICS.sub("", text)).casefold()

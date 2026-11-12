@@ -16,6 +16,11 @@ def test_arabic_terms_skip_stopwords(companies):
     assert "الي" not in terms and "إلى" not in terms
 
 
+def test_arabic_spelling_variants_count_once_and_keep_real_spelling():
+    docs = [["أمنية"], ["أمنية"], ["امنيه"]]
+    assert top_terms(docs, limit=3) == [("أمنية", 3)]
+
+
 def test_top_terms_prefers_phrases_and_needs_two_mentions():
     docs = [["battery", "range", "battery range"], ["battery", "range", "battery range"], ["recall"]]
     assert top_terms(docs, limit=5) == [("battery range", 2)]
