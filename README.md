@@ -50,7 +50,8 @@ murmur run --sentiment model
 ## Track different companies
 
 Edit [`companies.toml`](companies.toml): each company has a name, colour, aliases that must appear
-in a post, a GDELT news query per language, search terms and a Wikipedia article.
+in a post, phrases to exclude, one GDELT news query (matched in English and Arabic sources), search
+terms and a Wikipedia article.
 
 ## Project layout
 
