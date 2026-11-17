@@ -4,8 +4,10 @@ from murmur.config import load_companies, news_query
 def test_loads_companies_with_queries(companies):
     ids = [c.id for c in companies]
     assert ids[:3] == ["apple", "tesla", "emirates"]
+    assert len(ids) > 100
+    assert [c.id for c in companies if c.featured] == ["apple", "tesla", "emirates"]
     for c in companies:
-        assert c.aliases and c.search and c.news and c.headlines.get("en"), c.id
+        assert c.aliases and c.search and c.sector and c.headlines.get("en"), c.id
         assert "&" not in c.news, c.id
 
 

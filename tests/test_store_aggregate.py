@@ -42,7 +42,7 @@ def test_summary_shape_and_numbers(companies, now):
     pageviews = {"tesla": [{"date": now.date().isoformat(), "views": 1200}]}
     s = build_summary(companies, mentions, pageviews, "lexicon", now=now)
 
-    assert s["version"] == 1 and len(s["companies"]) == 3
+    assert s["version"] == 1 and len(s["companies"]) == len(companies)
     tesla = next(c for c in s["companies"] if c["id"] == "tesla")
     assert tesla["totals"]["mentions"] == 4
     assert tesla["totals"]["by_lang"] == {"en": 3, "ar": 1, "other": 0}

@@ -1,17 +1,29 @@
 # Companies Murmur follows. Edit this file to track different ones.
 #
-# id          short slug, used in URLs and file names
-# aliases     a post must contain one of these to count (case-insensitive; whole words for Latin script)
-# exclude     phrases that mark a post as off-topic for this company
-# news        GDELT query, matched in English and Arabic sources
-#             (https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/). Quote phrases of 2+ words only.
-# headlines   Google News search per language (en, ar)
-# search      search terms for Hacker News (English only) and Bluesky
-# wikipedia   English Wikipedia article title, for page views
+# Required
+#   id          short slug, used in URLs and file names
+#   name        display name
+#   sector      used to group companies in search
+#
+# Optional (defaults are built from the name, aliases and Arabic names; see src/murmur/config.py)
+#   featured    collected every hour and shown in summary.json; the rest rotate every few hours
+#   color       hex colour for charts
+#   known_as    other names people search for (e.g. "Google" for Alphabet)
+#   aliases     a post must contain one of these to count (case-insensitive; whole words for Latin script).
+#               Default: the name. Keep them specific for names that are also common words.
+#   ar          Arabic names; added to aliases and used for Arabic news and search
+#   exclude     phrases that mark a post as off-topic for this company
+#   news        GDELT query, matched in English and Arabic sources
+#               (https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/). Quote phrases of 2+ words only.
+#   headlines   Google News search per language (en, ar)
+#   search      search terms for Hacker News (English only) and Bluesky. Default: the name and first Arabic name
+#   wikipedia   English Wikipedia article title, for page views
 
 [[company]]
 id = "apple"
 name = "Apple"
+sector = "Tech"
+featured = true
 color = "#0A84FF"
 aliases = ["Apple", "iPhone", "iPad", "MacBook", "iOS", "Tim Cook", "آبل", "أبل", "ايفون", "آيفون"]
 exclude = ["apple music", "apple pie", "apple cider", "big apple", "apple tree", "apples"]
@@ -24,6 +36,8 @@ wikipedia = "Apple Inc."
 [[company]]
 id = "tesla"
 name = "Tesla"
+sector = "Automotive"
+featured = true
 color = "#E31937"
 aliases = ["Tesla", "Cybertruck", "Model Y", "Model 3", "Robotaxi", "تسلا"]
 exclude = ["nikola tesla", "tesla coil"]
@@ -36,6 +50,8 @@ wikipedia = "Tesla, Inc."
 [[company]]
 id = "emirates"
 name = "Emirates"
+sector = "Travel"
+featured = true
 color = "#C8A04A"
 aliases = [
   "Emirates airline", "Emirates Airlines", "Emirates flight", "Emirates flights", "fly Emirates",
@@ -47,3 +63,1105 @@ headlines.en = '"Emirates airline" OR "Emirates flight" OR "Emirates Group"'
 headlines.ar = '"طيران الإمارات"'
 search = ["Emirates airline", "Emirates flight", "flew Emirates", "Skywards", "طيران الإمارات"]
 wikipedia = "Emirates (airline)"
+
+# ---------- Tech ----------
+[[company]]
+id = "nvidia"
+name = "Nvidia"
+sector = "Tech"
+color = "#76B900"
+aliases = ["Nvidia", "Jensen Huang", "GeForce"]
+ar = ["إنفيديا", "انفيديا"]
+wikipedia = "Nvidia"
+[[company]]
+id = "microsoft"
+name = "Microsoft"
+sector = "Tech"
+color = "#00A4EF"
+known_as = ["MSFT"]
+aliases = ["Microsoft", "Satya Nadella", "Azure", "Windows 11", "Xbox"]
+ar = ["مايكروسوفت"]
+wikipedia = "Microsoft"
+[[company]]
+id = "google"
+name = "Google"
+sector = "Tech"
+color = "#4285F4"
+known_as = ["Alphabet", "YouTube"]
+aliases = ["Google", "Alphabet Inc", "Sundar Pichai", "YouTube"]
+ar = ["جوجل", "غوغل"]
+search = ["Google", "Alphabet Inc", "جوجل"]
+wikipedia = "Google"
+[[company]]
+id = "amazon"
+name = "Amazon"
+sector = "Tech"
+color = "#FF9900"
+known_as = ["AWS"]
+aliases = ["Amazon", "AWS", "Andy Jassy", "Prime Video"]
+ar = ["أمازون"]
+exclude = ["amazon rainforest", "amazon river", "amazon basin", "the amazon forest"]
+wikipedia = "Amazon (company)"
+[[company]]
+id = "meta"
+name = "Meta"
+sector = "Tech"
+color = "#0866FF"
+known_as = ["Facebook", "Instagram", "WhatsApp"]
+aliases = ["Meta Platforms", "Zuckerberg", "Meta AI", "Facebook", "Instagram", "WhatsApp"]
+ar = ["شركة ميتا"]
+search = ["Meta Platforms", "Zuckerberg", "Meta AI"]
+news = '("Meta Platforms" OR Zuckerberg OR "Meta AI" OR "شركة ميتا")'
+headlines.en = '"Meta Platforms" OR Zuckerberg OR "Meta AI"'
+wikipedia = "Meta Platforms"
+[[company]]
+id = "netflix"
+name = "Netflix"
+sector = "Tech"
+color = "#E50914"
+ar = ["نتفليكس"]
+wikipedia = "Netflix"
+[[company]]
+id = "openai"
+name = "OpenAI"
+sector = "Tech"
+color = "#10A37F"
+known_as = ["ChatGPT"]
+aliases = ["OpenAI", "ChatGPT", "Sam Altman"]
+ar = ["أوبن إيه آي"]
+wikipedia = "OpenAI"
+[[company]]
+id = "anthropic"
+name = "Anthropic"
+sector = "Tech"
+color = "#D97757"
+aliases = ["Anthropic", "Dario Amodei"]
+ar = ["أنثروبيك"]
+wikipedia = "Anthropic"
+[[company]]
+id = "oracle"
+name = "Oracle"
+sector = "Tech"
+color = "#C74634"
+aliases = ["Oracle Corp", "Oracle Cloud", "Oracle shares", "Larry Ellison", "Oracle's"]
+ar = ["أوراكل"]
+exclude = ["price oracle", "oracle of omaha"]
+search = ["Oracle", "Larry Ellison"]
+news = '("Oracle Corp" OR "Oracle Cloud" OR "Larry Ellison" OR أوراكل)'
+wikipedia = "Oracle Corporation"
+[[company]]
+id = "salesforce"
+name = "Salesforce"
+sector = "Tech"
+color = "#00A1E0"
+aliases = ["Salesforce", "Marc Benioff", "Slack"]
+wikipedia = "Salesforce"
+[[company]]
+id = "adobe"
+name = "Adobe"
+sector = "Tech"
+color = "#FA0F00"
+aliases = ["Adobe", "Photoshop", "Adobe Firefly"]
+wikipedia = "Adobe Inc."
+[[company]]
+id = "ibm"
+name = "IBM"
+sector = "Tech"
+color = "#0F62FE"
+aliases = ["IBM", "Red Hat", "Arvind Krishna"]
+ar = ["آي بي إم"]
+wikipedia = "IBM"
+[[company]]
+id = "intel"
+name = "Intel"
+sector = "Tech"
+color = "#0071C5"
+aliases = ["Intel", "Lip-Bu Tan", "Intel Core", "Intel Foundry"]
+ar = ["إنتل"]
+exclude = ["intel on", "intel from", "military intel", "intel suggests", "intel about", "good intel", "the intel is"]
+news = '("Intel Corp" OR "Intel chips" OR "Intel shares" OR "Lip-Bu Tan" OR إنتل)'
+headlines.en = '"Intel Corp" OR "Intel chips" OR "Intel shares"'
+wikipedia = "Intel"
+[[company]]
+id = "amd"
+name = "AMD"
+sector = "Tech"
+color = "#ED1C24"
+known_as = ["Advanced Micro Devices"]
+aliases = ["AMD", "Advanced Micro Devices", "Lisa Su", "Ryzen", "Radeon"]
+ar = ["إيه إم دي"]
+wikipedia = "AMD"
+[[company]]
+id = "qualcomm"
+name = "Qualcomm"
+sector = "Tech"
+color = "#3253DC"
+aliases = ["Qualcomm", "Snapdragon"]
+ar = ["كوالكوم"]
+wikipedia = "Qualcomm"
+[[company]]
+id = "broadcom"
+name = "Broadcom"
+sector = "Tech"
+color = "#CC092F"
+aliases = ["Broadcom", "Hock Tan", "VMware"]
+wikipedia = "Broadcom"
+[[company]]
+id = "tsmc"
+name = "TSMC"
+sector = "Tech"
+color = "#E60012"
+known_as = ["Taiwan Semiconductor"]
+aliases = ["TSMC", "Taiwan Semiconductor"]
+ar = ["تي إس إم سي"]
+wikipedia = "TSMC"
+[[company]]
+id = "asml"
+name = "ASML"
+sector = "Tech"
+color = "#10069F"
+aliases = ["ASML"]
+wikipedia = "ASML Holding"
+[[company]]
+id = "arm"
+name = "Arm"
+sector = "Tech"
+color = "#0091BD"
+aliases = ["Arm Holdings", "Rene Haas", "Arm chips", "Arm-based"]
+search = ["Arm Holdings", "Arm chips"]
+news = '("Arm Holdings" OR "Rene Haas")'
+wikipedia = "Arm Holdings"
+[[company]]
+id = "micron"
+name = "Micron"
+sector = "Tech"
+color = "#0055A5"
+aliases = ["Micron Technology", "Micron"]
+exclude = ["micron filter", "microns"]
+search = ["Micron Technology", "Micron"]
+wikipedia = "Micron Technology"
+[[company]]
+id = "samsung"
+name = "Samsung"
+sector = "Tech"
+color = "#1428A0"
+aliases = ["Samsung", "Galaxy S25", "Galaxy S26"]
+ar = ["سامسونج", "سامسونغ"]
+wikipedia = "Samsung"
+[[company]]
+id = "sony"
+name = "Sony"
+sector = "Tech"
+color = "#5865F2"
+aliases = ["Sony", "PlayStation"]
+ar = ["سوني", "بلايستيشن"]
+wikipedia = "Sony"
+[[company]]
+id = "huawei"
+name = "Huawei"
+sector = "Tech"
+color = "#C7000B"
+ar = ["هواوي"]
+wikipedia = "Huawei"
+[[company]]
+id = "xiaomi"
+name = "Xiaomi"
+sector = "Tech"
+color = "#FF6900"
+ar = ["شاومي"]
+wikipedia = "Xiaomi"
+[[company]]
+id = "alibaba"
+name = "Alibaba"
+sector = "Tech"
+color = "#FF6A00"
+aliases = ["Alibaba", "Qwen", "AliExpress"]
+ar = ["علي بابا"]
+wikipedia = "Alibaba Group"
+[[company]]
+id = "tencent"
+name = "Tencent"
+sector = "Tech"
+color = "#1E9FFF"
+aliases = ["Tencent", "WeChat"]
+ar = ["تينسنت"]
+wikipedia = "Tencent"
+[[company]]
+id = "tiktok"
+name = "TikTok"
+sector = "Tech"
+color = "#FE2C55"
+known_as = ["ByteDance"]
+aliases = ["TikTok", "ByteDance"]
+ar = ["تيك توك"]
+wikipedia = "TikTok"
+[[company]]
+id = "cisco"
+name = "Cisco"
+sector = "Tech"
+color = "#049FD9"
+aliases = ["Cisco"]
+ar = ["سيسكو"]
+wikipedia = "Cisco"
+[[company]]
+id = "dell"
+name = "Dell"
+sector = "Tech"
+color = "#007DB8"
+aliases = ["Dell Technologies", "Michael Dell", "Dell"]
+news = '("Dell Technologies" OR "Michael Dell")'
+wikipedia = "Dell Technologies"
+[[company]]
+id = "palantir"
+name = "Palantir"
+sector = "Tech"
+color = "#101113"
+aliases = ["Palantir", "Alex Karp"]
+wikipedia = "Palantir Technologies"
+[[company]]
+id = "databricks"
+name = "Databricks"
+sector = "Tech"
+color = "#FF3621"
+wikipedia = "Databricks"
+[[company]]
+id = "snowflake"
+name = "Snowflake"
+sector = "Tech"
+color = "#29B5E8"
+aliases = ["Snowflake Inc", "Snowflake data", "Snowflake stock", "Snowflake shares", "Snowflake AI"]
+search = ["Snowflake data", "Snowflake Inc"]
+news = '("Snowflake Inc" OR "Snowflake shares")'
+wikipedia = "Snowflake Inc."
+[[company]]
+id = "servicenow"
+name = "ServiceNow"
+sector = "Tech"
+color = "#62D84E"
+wikipedia = "ServiceNow"
+[[company]]
+id = "workday"
+name = "Workday"
+sector = "Tech"
+color = "#0875E1"
+aliases = ["Workday Inc", "Workday HR", "Workday software", "Workday's"]
+search = ["Workday software", "Workday Inc"]
+news = '"Workday Inc"'
+wikipedia = "Workday, Inc."
+[[company]]
+id = "sap"
+name = "SAP"
+sector = "Tech"
+color = "#0FAAFF"
+aliases = ["SAP SE", "SAP S/4HANA", "SAP software", "SAP"]
+exclude = ["tree sap", "maple sap", "sap from"]
+search = ["SAP SE", "SAP software"]
+news = '("SAP SE" OR "SAP software")'
+wikipedia = "SAP"
+[[company]]
+id = "atlassian"
+name = "Atlassian"
+sector = "Tech"
+color = "#0052CC"
+aliases = ["Atlassian", "Jira", "Confluence"]
+wikipedia = "Atlassian"
+[[company]]
+id = "shopify"
+name = "Shopify"
+sector = "Tech"
+color = "#95BF47"
+aliases = ["Shopify", "Tobi Lutke"]
+ar = ["شوبيفاي"]
+wikipedia = "Shopify"
+[[company]]
+id = "uber"
+name = "Uber"
+sector = "Tech"
+color = "#000000"
+aliases = ["Uber", "Uber Eats", "Dara Khosrowshahi"]
+ar = ["أوبر"]
+wikipedia = "Uber"
+[[company]]
+id = "airbnb"
+name = "Airbnb"
+sector = "Tech"
+color = "#FF5A5F"
+ar = ["إير بي إن بي"]
+wikipedia = "Airbnb"
+[[company]]
+id = "spotify"
+name = "Spotify"
+sector = "Tech"
+color = "#1DB954"
+ar = ["سبوتيفاي"]
+wikipedia = "Spotify"
+[[company]]
+id = "stripe"
+name = "Stripe"
+sector = "Tech"
+color = "#635BFF"
+aliases = ["Stripe Inc", "Stripe payments", "Stripe API", "Patrick Collison", "John Collison", "Stripe's"]
+search = ["Stripe payments", "Stripe API", "Stripe Inc"]
+news = '("Stripe Inc" OR "Stripe payments" OR "Patrick Collison")'
+wikipedia = "Stripe, Inc."
+[[company]]
+id = "coinbase"
+name = "Coinbase"
+sector = "Tech"
+color = "#0052FF"
+wikipedia = "Coinbase"
+[[company]]
+id = "reddit"
+name = "Reddit"
+sector = "Tech"
+color = "#FF4500"
+aliases = ["Reddit Inc", "Reddit shares", "Reddit stock", "Steve Huffman", "Reddit IPO"]
+search = ["Reddit Inc", "Reddit shares", "Steve Huffman"]
+news = '("Reddit Inc" OR "Reddit shares" OR "Steve Huffman")'
+wikipedia = "Reddit"
+[[company]]
+id = "linkedin"
+name = "LinkedIn"
+sector = "Tech"
+color = "#0A66C2"
+ar = ["لينكد إن"]
+wikipedia = "LinkedIn"
+[[company]]
+id = "github"
+name = "GitHub"
+sector = "Tech"
+color = "#24292F"
+aliases = ["GitHub", "GitHub Copilot"]
+wikipedia = "GitHub"
+[[company]]
+id = "lenovo"
+name = "Lenovo"
+sector = "Tech"
+color = "#E2231A"
+ar = ["لينوفو"]
+wikipedia = "Lenovo"
+[[company]]
+id = "ebay"
+name = "eBay"
+sector = "Tech"
+color = "#E53238"
+aliases = ["eBay"]
+wikipedia = "EBay"
+[[company]]
+id = "doordash"
+name = "DoorDash"
+sector = "Tech"
+color = "#FF3008"
+wikipedia = "DoorDash"
+[[company]]
+id = "duolingo"
+name = "Duolingo"
+sector = "Tech"
+color = "#58CC02"
+wikipedia = "Duolingo"
+[[company]]
+id = "canva"
+name = "Canva"
+sector = "Tech"
+color = "#00C4CC"
+wikipedia = "Canva"
+[[company]]
+id = "figma"
+name = "Figma"
+sector = "Tech"
+color = "#A259FF"
+wikipedia = "Figma"
+[[company]]
+id = "wealthsimple"
+name = "Wealthsimple"
+sector = "Tech"
+color = "#333333"
+wikipedia = "Wealthsimple"
+[[company]]
+id = "opentext"
+name = "OpenText"
+sector = "Tech"
+color = "#1B2A6B"
+aliases = ["OpenText"]
+wikipedia = "OpenText"
+
+# ---------- Finance ----------
+[[company]]
+id = "jpmorgan"
+name = "JPMorgan Chase"
+sector = "Finance"
+color = "#117ACA"
+known_as = ["JPMorgan", "Chase", "JP Morgan"]
+aliases = ["JPMorgan", "JP Morgan", "J.P. Morgan", "Jamie Dimon", "Chase Bank"]
+ar = ["جي بي مورغان"]
+search = ["JPMorgan", "Jamie Dimon"]
+wikipedia = "JPMorgan Chase"
+[[company]]
+id = "goldman"
+name = "Goldman Sachs"
+sector = "Finance"
+color = "#7399C6"
+aliases = ["Goldman Sachs", "Goldman"]
+ar = ["غولدمان ساكس"]
+search = ["Goldman Sachs"]
+wikipedia = "Goldman Sachs"
+[[company]]
+id = "morgan-stanley"
+name = "Morgan Stanley"
+sector = "Finance"
+color = "#002D72"
+ar = ["مورغان ستانلي"]
+wikipedia = "Morgan Stanley"
+[[company]]
+id = "bofa"
+name = "Bank of America"
+sector = "Finance"
+color = "#E31837"
+known_as = ["BofA"]
+aliases = ["Bank of America", "BofA"]
+search = ["Bank of America", "BofA"]
+wikipedia = "Bank of America"
+[[company]]
+id = "citi"
+name = "Citigroup"
+sector = "Finance"
+color = "#056DAE"
+known_as = ["Citi", "Citibank"]
+aliases = ["Citigroup", "Citibank", "Citi"]
+search = ["Citigroup", "Citibank"]
+wikipedia = "Citigroup"
+[[company]]
+id = "blackrock"
+name = "BlackRock"
+sector = "Finance"
+color = "#000000"
+aliases = ["BlackRock", "Larry Fink"]
+ar = ["بلاك روك"]
+wikipedia = "BlackRock"
+[[company]]
+id = "hsbc"
+name = "HSBC"
+sector = "Finance"
+color = "#DB0011"
+ar = ["إتش إس بي سي"]
+wikipedia = "HSBC"
+[[company]]
+id = "visa"
+name = "Visa"
+sector = "Finance"
+color = "#1A1F71"
+aliases = ["Visa Inc", "Visa card", "Visa cards", "Visa and Mastercard", "Visa shares"]
+search = ["Visa Inc", "Visa card"]
+news = '("Visa Inc" OR "Visa and Mastercard")'
+wikipedia = "Visa Inc."
+[[company]]
+id = "mastercard"
+name = "Mastercard"
+sector = "Finance"
+color = "#EB001B"
+ar = ["ماستركارد"]
+wikipedia = "Mastercard"
+[[company]]
+id = "paypal"
+name = "PayPal"
+sector = "Finance"
+color = "#003087"
+ar = ["باي بال"]
+wikipedia = "PayPal"
+[[company]]
+id = "rbc"
+name = "RBC"
+sector = "Finance"
+color = "#005DAA"
+known_as = ["Royal Bank of Canada"]
+aliases = ["RBC", "Royal Bank of Canada"]
+search = ["Royal Bank of Canada", "RBC"]
+wikipedia = "Royal Bank of Canada"
+[[company]]
+id = "td"
+name = "TD Bank"
+sector = "Finance"
+color = "#34A853"
+known_as = ["TD", "Toronto-Dominion"]
+aliases = ["TD Bank", "TD Securities", "Toronto-Dominion", "TD Canada Trust"]
+search = ["TD Bank", "TD Securities"]
+wikipedia = "Toronto-Dominion Bank"
+[[company]]
+id = "bmo"
+name = "BMO"
+sector = "Finance"
+color = "#0079C1"
+known_as = ["Bank of Montreal"]
+aliases = ["BMO", "Bank of Montreal"]
+search = ["BMO", "Bank of Montreal"]
+wikipedia = "Bank of Montreal"
+[[company]]
+id = "scotiabank"
+name = "Scotiabank"
+sector = "Finance"
+color = "#EC111A"
+aliases = ["Scotiabank", "Bank of Nova Scotia"]
+wikipedia = "Scotiabank"
+[[company]]
+id = "cibc"
+name = "CIBC"
+sector = "Finance"
+color = "#C41F3E"
+aliases = ["CIBC"]
+wikipedia = "Canadian Imperial Bank of Commerce"
+[[company]]
+id = "manulife"
+name = "Manulife"
+sector = "Finance"
+color = "#00A758"
+aliases = ["Manulife", "John Hancock"]
+search = ["Manulife"]
+wikipedia = "Manulife"
+[[company]]
+id = "sun-life"
+name = "Sun Life"
+sector = "Finance"
+color = "#F4B223"
+aliases = ["Sun Life"]
+wikipedia = "Sun Life Financial"
+
+# ---------- Consulting ----------
+[[company]]
+id = "deloitte"
+name = "Deloitte"
+sector = "Consulting"
+color = "#86BC25"
+ar = ["ديلويت"]
+wikipedia = "Deloitte"
+[[company]]
+id = "pwc"
+name = "PwC"
+sector = "Consulting"
+color = "#D04A02"
+known_as = ["PricewaterhouseCoopers"]
+aliases = ["PwC", "PricewaterhouseCoopers"]
+wikipedia = "PwC"
+[[company]]
+id = "ey"
+name = "EY"
+sector = "Consulting"
+color = "#FFE600"
+known_as = ["Ernst & Young"]
+aliases = ["Ernst & Young", "Ernst and Young", "EY"]
+search = ["Ernst & Young", "EY consulting"]
+news = '"Ernst and Young"'
+headlines.en = '"Ernst & Young" OR "EY"'
+wikipedia = "EY (company)"
+[[company]]
+id = "kpmg"
+name = "KPMG"
+sector = "Consulting"
+color = "#00338D"
+wikipedia = "KPMG"
+[[company]]
+id = "accenture"
+name = "Accenture"
+sector = "Consulting"
+color = "#A100FF"
+ar = ["أكسنتشر"]
+wikipedia = "Accenture"
+[[company]]
+id = "mckinsey"
+name = "McKinsey"
+sector = "Consulting"
+color = "#051C2C"
+aliases = ["McKinsey"]
+ar = ["ماكنزي"]
+wikipedia = "McKinsey & Company"
+[[company]]
+id = "bcg"
+name = "BCG"
+sector = "Consulting"
+color = "#29BA74"
+known_as = ["Boston Consulting Group"]
+aliases = ["Boston Consulting Group", "BCG"]
+search = ["Boston Consulting Group"]
+wikipedia = "Boston Consulting Group"
+
+# ---------- Telecom ----------
+[[company]]
+id = "bell"
+name = "Bell"
+sector = "Telecom"
+color = "#0066A4"
+known_as = ["Bell Canada", "BCE"]
+aliases = ["Bell Canada", "BCE Inc", "Bell Media", "Bell Mobility", "Bell Fibe", "Bell's"]
+search = ["Bell Canada", "BCE Inc"]
+news = '("Bell Canada" OR "BCE Inc" OR "Bell Media")'
+wikipedia = "Bell Canada"
+[[company]]
+id = "rogers"
+name = "Rogers"
+sector = "Telecom"
+color = "#DA291C"
+aliases = ["Rogers Communications", "Rogers Wireless", "Rogers internet", "Rogers outage"]
+search = ["Rogers Communications", "Rogers Wireless"]
+news = '"Rogers Communications"'
+wikipedia = "Rogers Communications"
+[[company]]
+id = "telus"
+name = "Telus"
+sector = "Telecom"
+color = "#4B286D"
+wikipedia = "Telus"
+[[company]]
+id = "verizon"
+name = "Verizon"
+sector = "Telecom"
+color = "#CD040B"
+wikipedia = "Verizon"
+[[company]]
+id = "att"
+name = "AT&T"
+sector = "Telecom"
+color = "#00A8E0"
+aliases = ["AT&T"]
+search = ["AT&T"]
+news = ""  # GDELT can't search for AT&T; Google News covers it
+headlines.en = '"AT&T"'
+wikipedia = "AT&T"
+[[company]]
+id = "t-mobile"
+name = "T-Mobile"
+sector = "Telecom"
+color = "#E20074"
+aliases = ["T-Mobile"]
+search = ["T-Mobile"]
+wikipedia = "T-Mobile US"
+[[company]]
+id = "vodafone"
+name = "Vodafone"
+sector = "Telecom"
+color = "#E60000"
+ar = ["فودافون"]
+wikipedia = "Vodafone"
+[[company]]
+id = "etisalat"
+name = "e&"
+sector = "Telecom"
+color = "#E00800"
+known_as = ["Etisalat"]
+aliases = ["Etisalat", "e& group"]
+search = ["Etisalat"]
+news = 'Etisalat'
+headlines.en = 'Etisalat OR "e& group"'
+wikipedia = "E& (company)"
+
+# ---------- Automotive ----------
+[[company]]
+id = "toyota"
+name = "Toyota"
+sector = "Automotive"
+color = "#EB0A1E"
+ar = ["تويوتا"]
+wikipedia = "Toyota"
+[[company]]
+id = "bmw"
+name = "BMW"
+sector = "Automotive"
+color = "#1C69D4"
+ar = ["بي إم دبليو"]
+wikipedia = "BMW"
+[[company]]
+id = "mercedes"
+name = "Mercedes-Benz"
+sector = "Automotive"
+color = "#00ADEF"
+known_as = ["Mercedes"]
+aliases = ["Mercedes-Benz", "Mercedes Benz"]
+ar = ["مرسيدس"]
+exclude = ["mercedes f1", "mercedes amg petronas"]
+search = ["Mercedes-Benz", "مرسيدس"]
+wikipedia = "Mercedes-Benz Group"
+[[company]]
+id = "ford"
+name = "Ford"
+sector = "Automotive"
+color = "#003478"
+aliases = ["Ford Motor", "Ford F-150", "Jim Farley", "Ford Mustang", "Ford Bronco", "Ford's EV"]
+search = ["Ford Motor", "Ford F-150"]
+news = '("Ford Motor" OR "Jim Farley" OR "Ford F-150")'
+wikipedia = "Ford Motor Company"
+[[company]]
+id = "gm"
+name = "General Motors"
+sector = "Automotive"
+color = "#0170CE"
+known_as = ["GM"]
+aliases = ["General Motors", "Mary Barra"]
+ar = ["جنرال موتورز"]
+wikipedia = "General Motors"
+[[company]]
+id = "rivian"
+name = "Rivian"
+sector = "Automotive"
+color = "#FFAF00"
+wikipedia = "Rivian"
+[[company]]
+id = "byd"
+name = "BYD"
+sector = "Automotive"
+color = "#C8102E"
+aliases = ["BYD"]
+ar = ["بي واي دي"]
+wikipedia = "BYD Auto"
+
+# ---------- Aerospace ----------
+[[company]]
+id = "boeing"
+name = "Boeing"
+sector = "Aerospace"
+color = "#0033A0"
+ar = ["بوينغ"]
+wikipedia = "Boeing"
+[[company]]
+id = "airbus"
+name = "Airbus"
+sector = "Aerospace"
+color = "#00205B"
+ar = ["إيرباص"]
+wikipedia = "Airbus"
+[[company]]
+id = "bombardier"
+name = "Bombardier"
+sector = "Aerospace"
+color = "#000000"
+wikipedia = "Bombardier Inc."
+[[company]]
+id = "spacex"
+name = "SpaceX"
+sector = "Aerospace"
+color = "#005288"
+aliases = ["SpaceX", "Starlink", "Starship"]
+ar = ["سبيس إكس"]
+wikipedia = "SpaceX"
+
+# ---------- Travel ----------
+[[company]]
+id = "etihad"
+name = "Etihad"
+sector = "Travel"
+color = "#BD8B13"
+aliases = ["Etihad Airways", "Etihad"]
+ar = ["الاتحاد للطيران"]
+exclude = ["etihad stadium", "etihad arena"]
+search = ["Etihad Airways", "الاتحاد للطيران"]
+wikipedia = "Etihad Airways"
+[[company]]
+id = "qatar-airways"
+name = "Qatar Airways"
+sector = "Travel"
+color = "#5C0632"
+ar = ["الخطوط الجوية القطرية"]
+wikipedia = "Qatar Airways"
+[[company]]
+id = "flydubai"
+name = "flydubai"
+sector = "Travel"
+color = "#F26522"
+aliases = ["flydubai", "fly dubai"]
+ar = ["فلاي دبي"]
+wikipedia = "Flydubai"
+[[company]]
+id = "air-canada"
+name = "Air Canada"
+sector = "Travel"
+color = "#F01428"
+wikipedia = "Air Canada"
+[[company]]
+id = "booking"
+name = "Booking.com"
+sector = "Travel"
+color = "#003580"
+aliases = ["Booking.com", "Booking Holdings"]
+search = ["Booking.com"]
+wikipedia = "Booking.com"
+
+# ---------- Gulf business ----------
+[[company]]
+id = "aramco"
+name = "Aramco"
+sector = "Gulf business"
+color = "#00A3E0"
+known_as = ["Saudi Aramco"]
+aliases = ["Aramco"]
+ar = ["أرامكو"]
+wikipedia = "Saudi Aramco"
+[[company]]
+id = "adnoc"
+name = "ADNOC"
+sector = "Gulf business"
+color = "#0047BA"
+known_as = ["Abu Dhabi National Oil Company"]
+aliases = ["ADNOC"]
+ar = ["أدنوك"]
+wikipedia = "ADNOC"
+[[company]]
+id = "emaar"
+name = "Emaar"
+sector = "Gulf business"
+color = "#1B1B1B"
+aliases = ["Emaar"]
+ar = ["إعمار"]
+wikipedia = "Emaar Properties"
+[[company]]
+id = "dp-world"
+name = "DP World"
+sector = "Gulf business"
+color = "#1D2D5C"
+ar = ["موانئ دبي العالمية"]
+wikipedia = "DP World"
+[[company]]
+id = "careem"
+name = "Careem"
+sector = "Gulf business"
+color = "#1DBF73"
+aliases = ["Careem"]
+ar = ["تطبيق كريم"]
+search = ["Careem"]
+wikipedia = "Careem"
+[[company]]
+id = "talabat"
+name = "Talabat"
+sector = "Gulf business"
+color = "#FF5A00"
+ar = ["طلبات"]
+search = ["Talabat"]
+wikipedia = "Talabat"
+[[company]]
+id = "mubadala"
+name = "Mubadala"
+sector = "Gulf business"
+color = "#003F6A"
+ar = ["مبادلة"]
+wikipedia = "Mubadala Investment Company"
+[[company]]
+id = "g42"
+name = "G42"
+sector = "Gulf business"
+color = "#000000"
+aliases = ["G42"]
+search = ["G42"]
+news = '"G42"'
+wikipedia = "G42 (company)"
+[[company]]
+id = "neom"
+name = "NEOM"
+sector = "Gulf business"
+color = "#2B2B2B"
+aliases = ["NEOM", "The Line"]
+ar = ["نيوم"]
+search = ["NEOM", "نيوم"]
+wikipedia = "Neom"
+[[company]]
+id = "pif"
+name = "PIF"
+sector = "Gulf business"
+color = "#00704A"
+known_as = ["Public Investment Fund"]
+aliases = ["Public Investment Fund", "Saudi PIF"]
+ar = ["صندوق الاستثمارات العامة"]
+search = ["Public Investment Fund", "Saudi PIF"]
+wikipedia = "Public Investment Fund"
+
+# ---------- Energy ----------
+[[company]]
+id = "shell"
+name = "Shell"
+sector = "Energy"
+color = "#DD1D21"
+aliases = ["Shell plc", "Shell oil", "Royal Dutch Shell", "Shell's CEO"]
+ar = ["شركة شل"]
+search = ["Shell plc", "Shell oil"]
+news = '("Shell plc" OR "Royal Dutch Shell" OR "شركة شل")'
+wikipedia = "Shell plc"
+[[company]]
+id = "exxon"
+name = "ExxonMobil"
+sector = "Energy"
+color = "#ED1B2D"
+known_as = ["Exxon"]
+aliases = ["ExxonMobil", "Exxon Mobil", "Exxon"]
+ar = ["إكسون موبيل"]
+search = ["Exxon"]
+wikipedia = "ExxonMobil"
+[[company]]
+id = "enbridge"
+name = "Enbridge"
+sector = "Energy"
+color = "#FFC72C"
+wikipedia = "Enbridge"
+
+# ---------- Consumer ----------
+[[company]]
+id = "nike"
+name = "Nike"
+sector = "Consumer"
+color = "#111111"
+aliases = ["Nike"]
+ar = ["نايكي"]
+wikipedia = "Nike, Inc."
+[[company]]
+id = "coca-cola"
+name = "Coca-Cola"
+sector = "Consumer"
+color = "#F40009"
+known_as = ["Coke"]
+aliases = ["Coca-Cola", "Coca Cola"]
+ar = ["كوكا كولا"]
+search = ["Coca-Cola"]
+wikipedia = "The Coca-Cola Company"
+[[company]]
+id = "pepsico"
+name = "PepsiCo"
+sector = "Consumer"
+color = "#004B93"
+known_as = ["Pepsi"]
+aliases = ["PepsiCo", "Pepsi"]
+ar = ["بيبسي"]
+wikipedia = "PepsiCo"
+[[company]]
+id = "mcdonalds"
+name = "McDonald's"
+sector = "Consumer"
+color = "#FFC72C"
+aliases = ["McDonald's", "McDonald’s", "McDonalds"]
+ar = ["ماكدونالدز"]
+search = ["McDonald's", "McDonalds"]
+news = '(McDonalds OR ماكدونالدز)'
+headlines.en = "McDonald's"
+wikipedia = "McDonald's"
+[[company]]
+id = "starbucks"
+name = "Starbucks"
+sector = "Consumer"
+color = "#00704A"
+ar = ["ستاربكس"]
+wikipedia = "Starbucks"
+[[company]]
+id = "walmart"
+name = "Walmart"
+sector = "Consumer"
+color = "#0071CE"
+ar = ["وول مارت"]
+wikipedia = "Walmart"
+[[company]]
+id = "costco"
+name = "Costco"
+sector = "Consumer"
+color = "#E31837"
+wikipedia = "Costco"
+[[company]]
+id = "disney"
+name = "Disney"
+sector = "Consumer"
+color = "#113CCF"
+aliases = ["Disney", "Disney+", "Bob Iger"]
+ar = ["ديزني"]
+wikipedia = "The Walt Disney Company"
+[[company]]
+id = "lvmh"
+name = "LVMH"
+sector = "Consumer"
+color = "#000000"
+aliases = ["LVMH", "Bernard Arnault", "Louis Vuitton"]
+wikipedia = "LVMH"
+[[company]]
+id = "ikea"
+name = "IKEA"
+sector = "Consumer"
+color = "#0058A3"
+aliases = ["IKEA"]
+ar = ["ايكيا"]
+wikipedia = "IKEA"
+[[company]]
+id = "lululemon"
+name = "Lululemon"
+sector = "Consumer"
+color = "#D31F33"
+wikipedia = "Lululemon"
+[[company]]
+id = "loblaw"
+name = "Loblaw"
+sector = "Consumer"
+color = "#E31837"
+aliases = ["Loblaw", "Loblaws", "No Frills", "Shoppers Drug Mart"]
+search = ["Loblaw", "Loblaws"]
+wikipedia = "Loblaw Companies"
+[[company]]
+id = "tim-hortons"
+name = "Tim Hortons"
+sector = "Consumer"
+color = "#C8102E"
+aliases = ["Tim Hortons", "Timmies"]
+wikipedia = "Tim Hortons"
+[[company]]
+id = "unilever"
+name = "Unilever"
+sector = "Consumer"
+color = "#1F36C7"
+ar = ["يونيليفر"]
+wikipedia = "Unilever"
+[[company]]
+id = "pg"
+name = "Procter & Gamble"
+sector = "Consumer"
+color = "#003DA5"
+known_as = ["P&G"]
+aliases = ["Procter & Gamble", "Procter and Gamble", "P&G"]
+search = ["Procter & Gamble"]
+news = '"Procter and Gamble"'
+headlines.en = '"Procter & Gamble"'
+wikipedia = "Procter & Gamble"
+
+# ---------- Health ----------
+[[company]]
+id = "pfizer"
+name = "Pfizer"
+sector = "Health"
+color = "#0093D0"
+ar = ["فايزر"]
+wikipedia = "Pfizer"
+[[company]]
+id = "lilly"
+name = "Eli Lilly"
+sector = "Health"
+color = "#D52B1E"
+known_as = ["Lilly"]
+aliases = ["Eli Lilly", "Mounjaro", "Zepbound"]
+ar = ["إيلي ليلي"]
+wikipedia = "Eli Lilly and Company"
+[[company]]
+id = "novo-nordisk"
+name = "Novo Nordisk"
+sector = "Health"
+color = "#001965"
+aliases = ["Novo Nordisk", "Ozempic", "Wegovy"]
+ar = ["نوفو نورديسك"]
+wikipedia = "Novo Nordisk"
+[[company]]
+id = "jnj"
+name = "Johnson & Johnson"
+sector = "Health"
+color = "#D51900"
+known_as = ["J&J"]
+aliases = ["Johnson & Johnson", "Johnson and Johnson", "J&J"]
+search = ["Johnson & Johnson"]
+news = '"Johnson and Johnson"'
+headlines.en = '"Johnson & Johnson"'
+wikipedia = "Johnson & Johnson"
+
+# ---------- Media ----------
+[[company]]
+id = "thomson-reuters"
+name = "Thomson Reuters"
+sector = "Media"
+color = "#FA6400"
+aliases = ["Thomson Reuters"]
+wikipedia = "Thomson Reuters"
+
