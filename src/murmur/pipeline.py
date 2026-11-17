@@ -108,7 +108,7 @@ def run(
     stats.collected = len(raw)
     items = clean(raw, companies, known_ids=store.known_ids(days=3, now=now))
     stats.kept = len(items)
-    stats.added = store.add(to_mentions(items, companies, backend))
+    stats.added = store.add(to_mentions(items, companies, backend), now=now)
     stats.pruned = store.prune(now=now)
 
     views = {c.id: wikipedia.collect(client, c.wikipedia) for c in chosen if c.wikipedia}

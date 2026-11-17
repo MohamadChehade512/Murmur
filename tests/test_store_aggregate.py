@@ -21,13 +21,22 @@ def m(i, company="tesla", when=None, lang="en", sentiment="positive", source="hn
     )
 
 
-def test_store_merges_by_day_and_prunes(tmp_path, now):
+def test_store_adds_run_files_and_prunes(tmp_path, now):
     store = Store(tmp_path)
-    assert store.add([m(1, when=now), m(2, when=now - timedelta(days=1))]) == 2
-    assert store.add([m(1, when=now)]) == 0
-    assert {x.id for x in store.load(2, now=now)} == {"id1", "id2"}
-    store.add([m(3, when=now - timedelta(days=40))])
+    assert store.add([m(1, when=now), m(2, when=now - timedelta(days=1))], now=now) == 2
+    assert store.add([m(1, when=now), m(4, when=now)], now=now) == 1
+    assert {x.id for x in store.load(2, now=now)} == {"id1", "id2", "id4"}
+    # Each run adds its own file; the same second gets a suffix rather than overwriting.
+    assert len(list((tmp_path / "mentions" / now.date().isoformat()).glob("*.jsonl.gz"))) == 2
+    store.add([m(3, when=now - timedelta(days=40))], now=now)
     assert store.prune(keep_days=30, now=now) == 1
+
+
+def test_store_reads_legacy_day_files(tmp_path, now):
+    store = Store(tmp_path)
+    store._write(tmp_path / "mentions" / f"{now.date().isoformat()}.jsonl.gz", [m(1, when=now)])
+    assert store.add([m(1, when=now), m(2, when=now)], now=now) == 1
+    assert {x.id for x in store.load(1, now=now)} == {"id1", "id2"}
 
 
 def test_summary_shape_and_numbers(companies, now):
