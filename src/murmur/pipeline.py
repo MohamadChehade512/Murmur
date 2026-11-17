@@ -19,6 +19,9 @@ from .sources import bluesky, gdelt, google_news, hackernews, wikipedia
 from .store import Store
 
 log = logging.getLogger(__name__)
+# Featured companies are collected every run; the rest are split into this many groups and one group
+# is collected each hour, so every company refreshes every few hours while runs stay short and polite.
+ROTATION_GROUPS = 4
 SITE_DIR = Path(__file__).resolve().parents[2] / "site"
 
 
@@ -28,6 +31,15 @@ class RunStats:
     kept: int = 0
     added: int = 0
     pruned: int = 0
+
+
+def pick(companies: list[Company], now: datetime, everyone: bool = False) -> list[Company]:
+    """The companies to collect this run: all featured ones plus this hour's rotating group."""
+    if everyone:
+        return companies
+    rotating = [c for c in companies if not c.featured]
+    slot = now.hour % ROTATION_GROUPS
+    return [c for c in companies if c.featured] + rotating[slot::ROTATION_GROUPS]
 
 
 def collect_all(client: PoliteClient, companies: list[Company], hours: int) -> list[RawItem]:
@@ -83,20 +95,23 @@ def run(
     hours: int = 6,
     client: PoliteClient | None = None,
     now: datetime | None = None,
+    everyone: bool = False,
 ) -> RunStats:
     client = client or PoliteClient(
         min_interval={gdelt.HOST: gdelt.MIN_INTERVAL, google_news.HOST: google_news.MIN_INTERVAL}
     )
     stats = RunStats()
 
-    raw = collect_all(client, companies, hours)
+    chosen = pick(companies, now or datetime.now(UTC), everyone)
+    log.info("collecting %d of %d companies", len(chosen), len(companies))
+    raw = collect_all(client, chosen, hours)
     stats.collected = len(raw)
     items = clean(raw, companies, known_ids=store.known_ids(days=3, now=now))
     stats.kept = len(items)
     stats.added = store.add(to_mentions(items, companies, backend))
     stats.pruned = store.prune(now=now)
 
-    views = {c.id: wikipedia.collect(client, c.wikipedia) for c in companies if c.wikipedia}
+    views = {c.id: wikipedia.collect(client, c.wikipedia) for c in chosen if c.wikipedia}
     if any(views.values()):
         store.save_pageviews({**store.load_pageviews(), **{k: v for k, v in views.items() if v}})
 

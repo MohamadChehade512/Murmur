@@ -20,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--data", type=Path, default=Path("data"), help="storage folder (the data branch)")
     r.add_argument("--out", type=Path, default=Path("public"), help="folder to publish")
     r.add_argument("--hours", type=int, default=6, help="how far back to look each run")
+    r.add_argument("--all", action="store_true", help="collect every company, not just this hour's group")
     r.add_argument("--sentiment", choices=("lexicon", "model"), default="lexicon")
     args = parser.parse_args(argv)
 
@@ -30,6 +31,7 @@ def main(argv: list[str] | None = None) -> int:
         args.out,
         get_backend(args.sentiment),
         hours=args.hours,
+        everyone=args.all,
     )
     return 0 if stats.collected or stats.added else 1
 
