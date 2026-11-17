@@ -1,0 +1,33 @@
+name: Squash data history
+
+# The data branch gets a commit every hour. Once a week, replace its history with a single commit of
+# the current files, so the repository stays small. The files themselves are unchanged.
+on:
+  schedule:
+    - cron: "47 3 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Same group as the collect job, so the two never push at the same time.
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  squash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+          fetch-depth: 1
+
+      - name: Replace history with one commit
+        run: |
+          git config user.name "murmur-bot"
+          git config user.email "murmur-bot@users.noreply.github.com"
+          commit=$(git commit-tree "HEAD^{tree}" -m "Data: snapshot of $(date -u +'%Y-%m-%d') (history squashed weekly)")
+          git push --force origin "$commit:refs/heads/data"
