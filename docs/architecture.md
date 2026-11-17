@@ -6,10 +6,12 @@ output is a static site and a set of JSON files on GitHub Pages.
 ## Which companies each run collects
 
 Murmur follows the companies in `companies.toml` (137 at the moment). Featured companies are
-collected every run. The rest are split into four groups and each run collects one of them, so every
-company refreshes every four hours while a run stays a few minutes long and polite to each source.
-Each run looks back six hours, so a skipped run leaves no gap. The published files are always rebuilt
-from storage for every company, not only the ones collected that hour.
+collected every run. Of the rest, each run takes the quarter that were collected longest ago, so every
+company comes round in about four runs while a run stays short and polite to each source.
+`collected.json` on the data branch records when each company was last collected, and each search
+looks back to that moment plus an hour (at least 6 hours, at most 48). GitHub runs schedules on a
+best-effort basis and sometimes skips hours, so nothing assumes the job really runs hourly. The
+published files are always rebuilt from storage for every company, not only the ones just collected.
 
 If a source keeps rate limiting (GDELT often does on shared cloud IPs), it is skipped for the rest
 of that run and picked up again next hour.

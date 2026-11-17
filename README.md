@@ -21,7 +21,7 @@ Wikipedia page views ───────────────────�
 
 Every hour a GitHub Actions workflow runs the pipeline, saves new mentions to the `data` branch and
 publishes the dashboard and its JSON files to GitHub Pages. Featured companies are collected every
-hour and the rest in rotation, every four hours. Sentiment comes from a multilingual
+run and the rest in rotation, least recently collected first, so each comes round about every four runs. Sentiment comes from a multilingual
 model that reads English and Arabic, running on the Actions runner's CPU.
 
 - [Architecture](docs/architecture.md): stages, modules, and the `summary.json` schema
@@ -45,7 +45,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest                                   # offline tests
 murmur run --hours 24                    # live run with the English lexicon, writes ./data and ./public
-murmur run --hours 24 --all              # every company, not just this hour's group (slower)
+murmur run --hours 24 --all              # every company, not just this run's share (slower)
 python -m http.server -d public 8000     # view the dashboard at http://localhost:8000
 ```
 
