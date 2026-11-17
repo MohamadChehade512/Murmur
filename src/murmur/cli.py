@@ -19,7 +19,12 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--config", type=Path, default=DEFAULT_PATH, help="companies.toml")
     r.add_argument("--data", type=Path, default=Path("data"), help="storage folder (the data branch)")
     r.add_argument("--out", type=Path, default=Path("public"), help="folder to publish")
-    r.add_argument("--hours", type=int, default=6, help="minimum hours back to look (longer if a company was last collected earlier)")
+    r.add_argument(
+        "--hours",
+        type=int,
+        default=6,
+        help="minimum hours back to look (longer if a company was last collected earlier)",
+    )
     r.add_argument("--all", action="store_true", help="collect every company, not just this run's share")
     r.add_argument("--sentiment", choices=("lexicon", "model"), default="lexicon")
     args = parser.parse_args(argv)
