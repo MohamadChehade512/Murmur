@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Murmur | Live media monitoring</title>
-<meta name="description" content="What people say about Apple, Tesla and Emirates across news, Hacker News and Bluesky, in English and Arabic. Updated hourly.">
+<meta name="description" content="What people say about big companies across news, Hacker News and Bluesky, in English and Arabic. Updated hourly.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 :root {
@@ -59,6 +59,18 @@ h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
 
 footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
 footer p { margin: 0; max-width: 72ch; }
+.lookup { margin-top: 40px; }
+.lookup h2 { margin: 0 0 4px; font-size: 22px; }
+.lookup > p { margin: 0 0 14px; color: var(--ink-2); }
+.search { position: relative; max-width: 520px; margin-bottom: 16px; }
+.search input { width: 100%; font: inherit; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.results { list-style: none; margin: 6px 0 0; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); position: absolute; inset-inline: 0; z-index: 2; box-shadow: 0 8px 24px rgb(0 0 0 / .08); }
+.results li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.results li[aria-selected="true"], .results li:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.results small { margin-left: auto; color: var(--muted); font-size: 12px; }
+.results .none { cursor: default; color: var(--muted); }
+.lookup .card { max-width: 640px; }
 .error { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
 </style>
 </head>
@@ -70,16 +82,26 @@ footer p { margin: 0; max-width: 72ch; }
         <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#5b4bff"/><path d="M7 19c2-5 4-5 6 0s4 5 6 0 4-5 6 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="25" cy="10" r="2.4" fill="#fff"/></svg>
         Murmur
       </h1>
-      <p class="lede">What people are saying about three companies across the news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised every hour.</p>
+      <p class="lede">What people are saying about big companies across the news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised every hour.</p>
     </div>
     <p class="status" id="status">Loading…</p>
   </header>
 
   <main id="app" class="grid" aria-live="polite"></main>
 
+  <section class="lookup" id="lookup" hidden>
+    <h2>Look up a company</h2>
+    <p id="lookup-count"></p>
+    <div class="search">
+      <input id="q" type="search" autocomplete="off" placeholder="Try Nvidia, Shopify or Deloitte" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list" aria-label="Company name">
+      <ul id="results" class="results" role="listbox" hidden></ul>
+    </div>
+    <div id="picked" aria-live="polite"></div>
+  </section>
+
   <footer>
     <p>An open-source project by <a href="https://github.com/MohamadChehade512">Mohamad Chehade</a>. Built to show how media monitoring works. It is not affiliated with any of the companies shown. Sentiment is automated and approximate. Only links, scores and keywords are stored, never copies of people's posts.</p>
-    <p style="display:flex;gap:16px"><a href="https://github.com/MohamadChehade512/Murmur">Source on GitHub</a><a href="summary.json">summary.json</a></p>
+    <p style="display:flex;gap:16px"><a href="https://github.com/MohamadChehade512/Murmur">Source on GitHub</a><a href="summary.json">summary.json</a><a href="index.json">index.json</a></p>
   </footer>
 </div>
 
@@ -134,7 +156,7 @@ function terms(list, rtl) {
   return el('ul', { class: 'terms', dir: rtl ? 'rtl' : null, lang: rtl ? 'ar' : 'en' }, list.map((t) => el('li', {}, t.term, el('small', {}, String(t.count)))));
 }
 
-function company(c) {
+function company(c, prefix = 'h') {
   const s = c.sentiment, t = c.totals;
   const sentiment = s.scored
     ? [el('div', { class: 'bar', role: 'img', 'aria-label': `${Math.round(s.positive * 100)}% positive, ${Math.round(s.neutral * 100)}% neutral, ${Math.round(s.negative * 100)}% negative` },
@@ -143,9 +165,9 @@ function company(c) {
         el('span', { style: `width:${s.negative * 100}%;background:var(--neg)` })),
        el('div', { class: 'sent-labels' }, el('span', {}, `${Math.round(s.positive * 100)}% positive`), el('span', {}, `${Math.round(s.negative * 100)}% negative`))]
     : [el('p', { class: 'empty' }, 'No scored mentions yet.')];
-  return el('section', { class: 'card', style: `--c:${c.color}`, 'aria-labelledby': `h-${c.id}` },
+  return el('section', { class: 'card', style: `--c:${c.color}`, 'aria-labelledby': `${prefix}-${c.id}` },
     el('div', { class: 'headline-row' },
-      el('h2', { id: `h-${c.id}` }, el('span', { class: 'dot' }), c.name),
+      el('h2', { id: `${prefix}-${c.id}` }, el('span', { class: 'dot' }), c.name),
       el('span', { class: 'count' }, el('b', {}, fmt.format(t.mentions)), 'mentions, 7 days')),
     el('div', {}, el('h3', {}, 'Mentions per day'), dailyChart(c),
       el('div', { class: 'legend' }, el('span', {}, el('i', { style: `background:${c.color}` }), `English ${fmt.format(t.by_lang.en)}`),
@@ -178,7 +200,84 @@ async function load() {
     status.textContent = '';
   }
 }
+// ---------- look up any company ----------
+const norm = (x) => x.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g, '');
+let index = [], active = -1, matches = [];
+
+function search(q) {
+  const k = norm(q);
+  if (!k) return [];
+  const score = (c) => {
+    const names = [c.name, ...c.known_as].map(norm);
+    if (names.some((n) => n === k)) return 0;
+    if (names.some((n) => n.startsWith(k))) return 1;
+    if (names.some((n) => n.includes(k))) return 2;
+    return norm(c.sector).startsWith(k) ? 3 : 9;
+  };
+  return index.map((c) => [score(c), c]).filter(([s]) => s < 9).sort((a, b) => a[0] - b[0] || b[1].mentions - a[1].mentions).slice(0, 8).map(([, c]) => c);
+}
+
+function showResults() {
+  const q = document.getElementById('q'), list = document.getElementById('results');
+  matches = search(q.value);
+  active = matches.length ? 0 : -1;
+  if (!q.value.trim()) { list.hidden = true; q.setAttribute('aria-expanded', 'false'); return; }
+  list.replaceChildren(...(matches.length
+    ? matches.map((c, i) => el('li', { role: 'option', id: `opt-${c.id}`, 'aria-selected': String(i === active), 'data-id': c.id },
+        el('span', { class: 'dot', style: `--c:${c.color}` }), c.name, el('small', {}, `${c.sector}, ${fmt.format(c.mentions)} mentions`)))
+    : [el('li', { class: 'none' }, 'Not tracked yet. Murmur follows the companies listed in companies.toml on GitHub.')]));
+  list.hidden = false;
+  q.setAttribute('aria-expanded', 'true');
+  q.setAttribute('aria-activedescendant', active >= 0 ? `opt-${matches[active].id}` : '');
+}
+
+async function pick(id) {
+  const q = document.getElementById('q'), list = document.getElementById('results'), out = document.getElementById('picked');
+  const c = index.find((x) => x.id === id);
+  if (!c) return;
+  q.value = c.name; list.hidden = true; q.setAttribute('aria-expanded', 'false');
+  out.replaceChildren(el('p', { class: 'empty' }, `Loading ${c.name}…`));
+  try {
+    const res = await fetch(`companies/${encodeURIComponent(id)}.json`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    out.replaceChildren(company((await res.json()).company, 'lookup'));
+    history.replaceState(null, '', `#${id}`);
+  } catch {
+    out.replaceChildren(el('p', { class: 'empty' }, `${c.name} could not be loaded. Try again shortly.`));
+  }
+}
+
+async function setupLookup() {
+  try {
+    const res = await fetch('index.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    index = (await res.json()).companies;
+  } catch { return; }
+  const q = document.getElementById('q'), list = document.getElementById('results');
+  document.getElementById('lookup-count').textContent = `Murmur follows ${index.length} companies. Search by name, another name, or sector.`;
+  document.getElementById('lookup').hidden = false;
+  q.addEventListener('input', showResults);
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!matches.length) return;
+      e.preventDefault();
+      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length;
+      [...list.children].forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
+      q.setAttribute('aria-activedescendant', `opt-${matches[active].id}`);
+    } else if (e.key === 'Enter' && active >= 0) {
+      e.preventDefault(); pick(matches[active].id);
+    } else if (e.key === 'Escape') {
+      list.hidden = true; q.setAttribute('aria-expanded', 'false');
+    }
+  });
+  list.addEventListener('mousedown', (e) => { const li = e.target.closest('[data-id]'); if (li) { e.preventDefault(); pick(li.dataset.id); } });
+  q.addEventListener('blur', () => { list.hidden = true; q.setAttribute('aria-expanded', 'false'); });
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && index.some((c) => c.id === hash)) pick(hash);
+}
+
 load();
+setupLookup();
 setInterval(load, 10 * 60 * 1000);
 </script>
 </body>
