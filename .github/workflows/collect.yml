@@ -9,6 +9,10 @@ on:
       hours:
         description: "How many hours back to collect"
         default: "6"
+      all:
+        description: "Collect every company, not just this hour's group (slower)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # push to the data branch
@@ -61,7 +65,9 @@ jobs:
           key: hf-${{ hashFiles('src/murmur/sentiment.py') }}
 
       - name: Run the pipeline
-        run: murmur run --sentiment model --data data --out public --hours "${{ inputs.hours || '6' }}"
+        run: >
+          murmur run --sentiment model --data data --out public
+          --hours "${{ inputs.hours || '6' }}" ${{ inputs.all && '--all' || '' }}
 
       - name: Save data to the data branch
         run: |
