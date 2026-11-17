@@ -15,7 +15,7 @@ from ..models import Company, RawItem
 
 API = "https://news.google.com/rss/search"
 HOST = "news.google.com"
-MIN_INTERVAL = 2.0
+MIN_INTERVAL = 4.0  # Google throttles faster callers after a few dozen requests
 EDITIONS = {
     "en": {"hl": "en-US", "gl": "US", "ceid": "US:en"},
     "ar": {"hl": "ar", "gl": "AE", "ceid": "AE:ar"},
