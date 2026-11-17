@@ -32,3 +32,21 @@ def test_gives_up_quietly_after_retries(monkeypatch):
     monkeypatch.setattr(client.session, "get", lambda *a, **k: FakeResp(429, b""))
     monkeypatch.setattr(h.time, "sleep", lambda s: None)
     assert client.get_json("https://example.com/x") is None
+
+
+def test_skips_a_host_that_keeps_rate_limiting(monkeypatch):
+    client = h.PoliteClient()
+    calls = []
+
+    def get(url, **k):
+        calls.append(url)
+        return FakeResp(200, b"Please limit requests to one every 5 seconds")
+
+    monkeypatch.setattr(client.session, "get", get)
+    monkeypatch.setattr(h.time, "sleep", lambda s: None)
+    for _ in range(h.MAX_STRIKES):
+        assert client.get_json("https://api.gdeltproject.org/x") is None
+    tried = len(calls)
+    assert client.get_json("https://api.gdeltproject.org/x") is None
+    assert len(calls) == tried  # no further requests once blocked
+    assert client.blocked("api.gdeltproject.org") and not client.blocked("example.com")

@@ -14,6 +14,9 @@ USER_AGENT = "Murmur/0.1 (+https://github.com/MohamadChehade512/Murmur)"
 log = logging.getLogger(__name__)
 RATE_LIMIT_RETRIES = 2
 RATE_LIMIT_BACKOFF = 20.0
+# After this many requests that stay rate limited, a host is skipped for the rest of the run,
+# so one busy source can't stretch an hourly run past its slot.
+MAX_STRIKES = 2
 
 
 class PoliteClient:
@@ -28,6 +31,10 @@ class PoliteClient:
         self.min_interval = min_interval or {}
         self.timeout = timeout
         self._last: dict[str, float] = {}
+        self._strikes: dict[str, int] = {}
+
+    def blocked(self, host: str) -> bool:
+        return self._strikes.get(host, 0) >= MAX_STRIKES
 
     def _throttle(self, host: str) -> None:
         wait = self.min_interval.get(host, 0) - (time.monotonic() - self._last.get(host, -1e9))
@@ -36,6 +43,8 @@ class PoliteClient:
 
     def _get(self, url: str, params: dict | None = None) -> requests.Response | None:
         host = urlparse(url).netloc
+        if self.blocked(host):
+            return None
         for attempt in range(RATE_LIMIT_RETRIES + 1):
             self._throttle(host)
             try:
@@ -52,6 +61,13 @@ class PoliteClient:
                 log.info("Rate limited by %s; waiting %.0fs", host, delay)
                 time.sleep(delay)
                 continue
+            if limited:
+                self._strikes[host] = self._strikes.get(host, 0) + 1
+                if self.blocked(host):
+                    log.warning("%s keeps rate limiting; skipping it for the rest of this run", host)
+                else:
+                    log.warning("GET %s still rate limited after %d retries", host, RATE_LIMIT_RETRIES)
+                return None
             try:
                 resp.raise_for_status()
             except requests.RequestException as exc:
