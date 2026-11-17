@@ -91,6 +91,14 @@ class Store:
                 removed += 1
         return removed
 
+    # ---------- when each company was last collected ----------
+    def save_collected(self, data: dict[str, str]) -> None:
+        (self.root / "collected.json").write_text(json.dumps(data, indent=1, sort_keys=True))
+
+    def load_collected(self) -> dict[str, str]:
+        path = self.root / "collected.json"
+        return json.loads(path.read_text()) if path.exists() else {}
+
     # ---------- page views ----------
     def save_pageviews(self, data: dict[str, list[dict]]) -> None:
         (self.root / "pageviews.json").write_text(json.dumps(data, indent=1, sort_keys=True))

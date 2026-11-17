@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
     inputs:
       hours:
-        description: "How many hours back to collect"
+        description: "Minimum hours back to collect"
         default: "6"
       all:
-        description: "Collect every company, not just this hour's group (slower)"
+        description: "Collect every company, not just this run's share (slower)"
         type: boolean
         default: false
 

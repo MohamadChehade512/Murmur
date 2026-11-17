@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -19,9 +20,12 @@ from .sources import bluesky, gdelt, google_news, hackernews, wikipedia
 from .store import Store
 
 log = logging.getLogger(__name__)
-# Featured companies are collected every run; the rest are split into this many groups and one group
-# is collected each hour, so every company refreshes every few hours while runs stay short and polite.
+# Featured companies are collected every run. Of the rest, the quarter collected longest ago go next,
+# so every company comes round in about four runs however often GitHub actually runs the schedule.
 ROTATION_GROUPS = 4
+# Each company looks back to its last collection (plus a margin), within these bounds.
+FIRST_LOOKBACK_HOURS = 24
+MAX_LOOKBACK_HOURS = 48
 SITE_DIR = Path(__file__).resolve().parents[2] / "site"
 
 
@@ -33,16 +37,24 @@ class RunStats:
     pruned: int = 0
 
 
-def pick(companies: list[Company], now: datetime, everyone: bool = False) -> list[Company]:
-    """The companies to collect this run: all featured ones plus this hour's rotating group."""
+def pick(companies: list[Company], last: dict[str, str], everyone: bool = False) -> list[Company]:
+    """The companies to collect this run: all featured ones plus the least recently collected quarter."""
     if everyone:
         return companies
-    rotating = [c for c in companies if not c.featured]
-    slot = now.hour % ROTATION_GROUPS
-    return [c for c in companies if c.featured] + rotating[slot::ROTATION_GROUPS]
+    rotating = sorted((c for c in companies if not c.featured), key=lambda c: last.get(c.id, ""))
+    batch = math.ceil(len(rotating) / ROTATION_GROUPS)
+    return [c for c in companies if c.featured] + rotating[:batch]
 
 
-def collect_all(client: PoliteClient, companies: list[Company], hours: int) -> list[RawItem]:
+def lookback(company: Company, last: dict[str, str], now: datetime, minimum: int) -> int:
+    """Hours back to search: since the last collection plus an hour, never less than `minimum`."""
+    if company.id not in last:
+        return max(minimum, FIRST_LOOKBACK_HOURS)
+    since = (now - datetime.fromisoformat(last[company.id])).total_seconds() / 3600
+    return min(MAX_LOOKBACK_HOURS, max(minimum, math.ceil(since) + 1))
+
+
+def collect_all(client: PoliteClient, companies: list[Company], hours: dict[str, int]) -> list[RawItem]:
     raw: list[RawItem] = []
     for c in companies:
         for name, fn in (
@@ -51,8 +63,8 @@ def collect_all(client: PoliteClient, companies: list[Company], hours: int) -> l
             ("hn", hackernews.collect),
             ("bluesky", bluesky.collect),
         ):
-            found = fn(client, c, hours)
-            log.info("%-8s %-7s %4d items", c.id, name, len(found))
+            found = fn(client, c, hours[c.id])
+            log.info("%-8s %-7s %4d items (%dh)", c.id, name, len(found), hours[c.id])
             raw += found
     return raw
 
@@ -107,14 +119,18 @@ def run(
     )
     stats = RunStats()
 
-    chosen = pick(companies, now or datetime.now(UTC), everyone)
+    started = now or datetime.now(UTC)
+    last = store.load_collected()
+    chosen = pick(companies, last, everyone)
     log.info("collecting %d of %d companies", len(chosen), len(companies))
-    raw = collect_all(client, chosen, hours)
+    raw = collect_all(client, chosen, {c.id: lookback(c, last, started, hours) for c in chosen})
     stats.collected = len(raw)
     items = clean(raw, companies, known_ids=store.known_ids(days=3, now=now))
     stats.kept = len(items)
     stats.added = store.add(to_mentions(items, companies, backend), now=now)
     stats.pruned = store.prune(now=now)
+    stamp = started.replace(microsecond=0).isoformat()
+    store.save_collected({**last, **{c.id: stamp for c in chosen}})
 
     views = {c.id: wikipedia.collect(client, c.wikipedia) for c in chosen if c.wikipedia}
     if any(views.values()):
