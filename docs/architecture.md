@@ -1,7 +1,18 @@
 # Architecture
 
 Murmur is a batch pipeline that runs once an hour on GitHub Actions. There is no server: the
-output is a static site and one JSON file on GitHub Pages.
+output is a static site and a set of JSON files on GitHub Pages.
+
+## Which companies each run collects
+
+Murmur follows the companies in `companies.toml` (137 at the moment). Featured companies are
+collected every run. The rest are split into four groups and each run collects one of them, so every
+company refreshes every four hours while a run stays a few minutes long and polite to each source.
+Each run looks back six hours, so a skipped run leaves no gap. The published files are always rebuilt
+from storage for every company, not only the ones collected that hour.
+
+If a source keeps rate limiting (GDELT often does on shared cloud IPs), it is skipped for the rest
+of that run and picked up again next hour.
 
 ```mermaid
 flowchart LR
@@ -15,13 +26,13 @@ flowchart LR
     C[Collect] --> CL[Clean<br/>strip markup, detect language,<br/>relevance, de-duplicate]
     CL --> S[Score<br/>multilingual sentiment model]
     S --> K[Keywords<br/>words and phrases]
-    K --> ST[(data branch<br/>day files, 30 days)]
+    K --> ST[(data branch<br/>one file per run, 30 days)]
     ST --> A[Aggregate<br/>7-day summary]
   end
   G & H & B --> C
   W --> A
-  A --> P[GitHub Pages<br/>dashboard + summary.json]
-  P --> SITE[Personal site<br/>live board]
+  A --> P[GitHub Pages<br/>dashboard, summary, index,<br/>a file per company]
+  P --> SITE[Personal site<br/>live board + search]
 ```
 
 ## Stages
@@ -32,11 +43,21 @@ flowchart LR
 | Clean | `clean.py`, `text.py` | Strips HTML and links, detects English or Arabic by script, keeps posts that mention a company alias (news already comes from phrase searches), drops spam and per-company exclusions, and removes duplicates by id and by text. |
 | Score | `sentiment.py` | `model` backend: a multilingual DistilBERT that labels English and Arabic text positive, neutral or negative. `lexicon` backend: VADER, English only, used in tests and as a fallback. |
 | Keywords | `keywords.py` | Single words plus two-word phrases, with English and Arabic stop words removed. Ranked by how many mentions use them. |
-| Store | `store.py` | One gzipped JSON Lines file per day on the `data` branch, kept for 30 days. Files are written deterministically so unchanged days don't create git diffs. |
-| Aggregate | `aggregate.py` | Builds `summary.json`: totals, per-day and per-hour counts, sentiment shares, top terms per language, latest headlines and Wikipedia page views. |
-| Publish | `pipeline.py` | Copies `site/` and writes `summary.json` into `public/`, which the workflow deploys to Pages. |
+| Store | `store.py` | Gzipped JSON Lines on the `data` branch, one folder per day and one small file per run, kept for 30 days. Each commit only adds new data, and a weekly job (`squash-data.yml`) replaces the branch history with a single commit. |
+| Aggregate | `aggregate.py` | Builds one summary per company (totals, per-day and per-hour counts, sentiment shares, top terms per language, latest headlines and Wikipedia page views), then the published files below. |
+| Publish | `pipeline.py` | Copies `site/` and writes the JSON files into `public/`, which the workflow deploys to Pages. |
+
+## Published files
+
+| File | What it holds |
+| --- | --- |
+| `summary.json` | The featured companies, everything the front page needs in one request. |
+| `index.json` | Every company's id, name, sector, other names (`known_as`), colour and weekly mention count. Small enough to search as you type. |
+| `companies/<id>.json` | One company's full summary (the same shape as an entry in `summary.json`) under `company`, fetched when someone looks it up. |
 
 ## summary.json
+
+`companies/<id>.json` uses the same envelope with a single `company` instead of `companies`.
 
 ```jsonc
 {

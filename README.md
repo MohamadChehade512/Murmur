@@ -1,11 +1,13 @@
 # Murmur
 
-**Live media monitoring, free to run.** Murmur follows three companies across news (GDELT and Google
+**Live media monitoring, free to run.** Murmur follows 137 companies across news (GDELT and Google
 News), Hacker News and Bluesky, in English and Arabic, and publishes an hourly dashboard of how often they are mentioned,
-how people feel about them, and the words people use.
+how people feel about them, and the words people use. Three are featured; any of the others can be looked up.
 
 **Dashboard:** https://mohamadchehade512.github.io/Murmur/
-**Data:** [`summary.json`](https://mohamadchehade512.github.io/Murmur/summary.json)
+**Data:** [`summary.json`](https://mohamadchehade512.github.io/Murmur/summary.json) (featured),
+[`index.json`](https://mohamadchehade512.github.io/Murmur/index.json) (every company), and
+`companies/<id>.json` for each one, e.g. [`companies/nvidia.json`](https://mohamadchehade512.github.io/Murmur/companies/nvidia.json)
 
 [![CI](https://github.com/MohamadChehade512/Murmur/actions/workflows/ci.yml/badge.svg)](https://github.com/MohamadChehade512/Murmur/actions/workflows/ci.yml)
 [![Collect and publish](https://github.com/MohamadChehade512/Murmur/actions/workflows/collect.yml/badge.svg)](https://github.com/MohamadChehade512/Murmur/actions/workflows/collect.yml)
@@ -18,7 +20,8 @@ Wikipedia page views ───────────────────�
 ```
 
 Every hour a GitHub Actions workflow runs the pipeline, saves new mentions to the `data` branch and
-publishes the dashboard and `summary.json` to GitHub Pages. Sentiment comes from a multilingual
+publishes the dashboard and its JSON files to GitHub Pages. Featured companies are collected every
+hour and the rest in rotation, every four hours. Sentiment comes from a multilingual
 model that reads English and Arabic, running on the Actions runner's CPU.
 
 - [Architecture](docs/architecture.md): stages, modules, and the `summary.json` schema
@@ -42,6 +45,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest                                   # offline tests
 murmur run --hours 24                    # live run with the English lexicon, writes ./data and ./public
+murmur run --hours 24 --all              # every company, not just this hour's group (slower)
 python -m http.server -d public 8000     # view the dashboard at http://localhost:8000
 ```
 
@@ -55,9 +59,11 @@ murmur run --sentiment model
 
 ## Track different companies
 
-Edit [`companies.toml`](companies.toml): each company has a name, colour, aliases that must appear
-in a post, phrases to exclude, a GDELT news query (matched in English and Arabic sources), Google
-News searches per language, search terms and a Wikipedia article.
+Edit [`companies.toml`](companies.toml). A company only needs an `id`, `name` and `sector`; aliases,
+news queries and search terms default to the name and any Arabic names (`ar`). Add specific
+`aliases` and `exclude` phrases when the name is also an everyday word, and set `featured = true` to
+collect it every hour and show it on the front page. After adding companies, run **Collect and
+publish** from the Actions tab with **all** ticked to fill them in straight away.
 
 ## Project layout
 
@@ -68,12 +74,12 @@ src/murmur/
   clean.py, text.py     normalise, detect language, filter, de-duplicate
   sentiment.py          lexicon and multilingual model backends
   keywords.py           words and phrases, English and Arabic
-  store.py              rolling day files on the data branch
-  aggregate.py          builds summary.json
+  store.py              one file per run on the data branch, 30 days
+  aggregate.py          builds summary.json, index.json and companies/*.json
   pipeline.py, cli.py   one full run: `murmur run`
 site/                   the static dashboard
 tests/                  offline tests with sample API responses
-.github/workflows/      CI and the hourly collect-and-publish job
+.github/workflows/      CI, the hourly collect-and-publish job, and the weekly data squash
 ```
 
 ## License
