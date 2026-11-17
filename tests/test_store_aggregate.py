@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
 
-from murmur.aggregate import build_summary
+from murmur.aggregate import build_outputs, build_summary
 from murmur.models import Mention
 from murmur.pipeline import publish
 from murmur.store import Store
@@ -63,7 +63,24 @@ def test_summary_shape_and_numbers(companies, now):
     assert tesla["headlines"][0]["title"] == "Tesla opens plant"
 
 
-def test_publish_writes_summary(tmp_path, companies, now):
-    publish(build_summary(companies, [], {}, "lexicon", now=now), tmp_path)
-    data = json.loads((tmp_path / "summary.json").read_text())
-    assert data["companies"][0]["totals"]["mentions"] == 0
+def test_outputs_featured_summary_index_and_company_files(tmp_path, companies, now):
+    mentions = [m(1, company="nvidia", when=now), m(2, company="nvidia", when=now), m(3, when=now)]
+    files = build_outputs(companies, mentions, {}, "lexicon", now=now)
+
+    assert [c["id"] for c in files["summary.json"]["companies"]] == ["apple", "tesla", "emirates"]
+    index = files["index.json"]["companies"]
+    assert len(index) == len(companies)
+    assert [c["name"].casefold() for c in index] == sorted(c["name"].casefold() for c in index)
+    nvidia = next(c for c in index if c["id"] == "nvidia")
+    assert nvidia["mentions"] == 2 and nvidia["sector"] == "Tech" and not nvidia["featured"]
+    google = next(c for c in index if c["id"] == "google")
+    assert "Alphabet" in google["known_as"]
+    detail = files["companies/nvidia.json"]
+    assert detail["version"] == 1 and detail["company"]["totals"]["mentions"] == 2
+
+    (tmp_path / "companies").mkdir()
+    (tmp_path / "companies" / "gone.json").write_text("{}")
+    publish(files, tmp_path)
+    assert json.loads((tmp_path / "summary.json").read_text())["companies"][1]["totals"]["mentions"] == 1
+    assert (tmp_path / "companies" / "nvidia.json").exists()
+    assert not (tmp_path / "companies" / "gone.json").exists()

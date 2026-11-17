@@ -1,4 +1,9 @@
-"""Builds summary.json, the one file dashboards read."""
+"""Builds the published JSON files.
+
+- `summary.json`: the featured companies, everything the front page needs in one file
+- `index.json`: every company's name, sector and weekly count, small enough to search as you type
+- `companies/<id>.json`: one company's full summary, fetched when someone looks it up
+"""
 
 from __future__ import annotations
 
@@ -95,6 +100,27 @@ def _company_summary(company: Company, mentions: list[Mention], pageviews: list[
     }
 
 
+def _envelope(sentiment_backend: str, now: datetime) -> dict:
+    return {
+        "version": SCHEMA_VERSION,
+        "generated_at": now.replace(microsecond=0).isoformat(),
+        "window_days": WINDOW_DAYS,
+        "sentiment_backend": sentiment_backend,
+        "sources": SOURCES,
+    }
+
+
+def _summaries(
+    companies: list[Company], mentions: list[Mention], pageviews: dict[str, list[dict]], now: datetime
+) -> dict[str, dict]:
+    window_start = now - timedelta(days=WINDOW_DAYS)
+    by_company: dict[str, list[Mention]] = defaultdict(list)
+    for m in mentions:
+        if datetime.fromisoformat(m.published_at) >= window_start:
+            by_company[m.company].append(m)
+    return {c.id: _company_summary(c, by_company[c.id], pageviews.get(c.id, []), now) for c in companies}
+
+
 def build_summary(
     companies: list[Company],
     mentions: list[Mention],
@@ -103,21 +129,41 @@ def build_summary(
     now: datetime | None = None,
 ) -> dict:
     now = now or datetime.now(UTC)
-    window_start = now - timedelta(days=WINDOW_DAYS)
-    recent = [m for m in mentions if datetime.fromisoformat(m.published_at) >= window_start]
-    return {
-        "version": SCHEMA_VERSION,
-        "generated_at": now.replace(microsecond=0).isoformat(),
-        "window_days": WINDOW_DAYS,
-        "sentiment_backend": sentiment_backend,
-        "sources": SOURCES,
-        "companies": [
-            _company_summary(
-                c,
-                [m for m in recent if m.company == c.id],
-                pageviews.get(c.id, []),
-                now,
-            )
-            for c in companies
-        ],
+    summaries = _summaries(companies, mentions, pageviews, now)
+    return {**_envelope(sentiment_backend, now), "companies": [summaries[c.id] for c in companies]}
+
+
+def build_outputs(
+    companies: list[Company],
+    mentions: list[Mention],
+    pageviews: dict[str, list[dict]],
+    sentiment_backend: str,
+    now: datetime | None = None,
+) -> dict[str, dict]:
+    """Every file to publish, keyed by its path."""
+    now = now or datetime.now(UTC)
+    summaries = _summaries(companies, mentions, pageviews, now)
+    env = _envelope(sentiment_backend, now)
+    featured = [c for c in companies if c.featured] or companies[:3]
+    files = {
+        "summary.json": {**env, "companies": [summaries[c.id] for c in featured]},
+        "index.json": {
+            "version": SCHEMA_VERSION,
+            "generated_at": env["generated_at"],
+            "companies": [
+                {
+                    "id": c.id,
+                    "name": c.name,
+                    "sector": c.sector,
+                    "known_as": list(c.known_as),
+                    "color": c.color,
+                    "featured": c.featured,
+                    "mentions": summaries[c.id]["totals"]["mentions"],
+                }
+                for c in sorted(companies, key=lambda c: c.name.casefold())
+            ],
+        },
     }
+    for c in companies:
+        files[f"companies/{c.id}.json"] = {**env, "company": summaries[c.id]}
+    return files

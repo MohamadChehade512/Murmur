@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .aggregate import WINDOW_DAYS, build_summary
+from .aggregate import WINDOW_DAYS, build_outputs
 from .clean import clean
 from .http import PoliteClient
 from .keywords import extract_terms
@@ -80,11 +80,16 @@ def to_mentions(items: list[RawItem], companies: list[Company], backend: Backend
     return out
 
 
-def publish(summary: dict, out_dir: Path) -> None:
+def publish(files: dict[str, dict], out_dir: Path) -> None:
+    """Copies the dashboard into `out_dir` and writes each JSON file at its path."""
     out_dir.mkdir(parents=True, exist_ok=True)
     if SITE_DIR.exists():
         shutil.copytree(SITE_DIR, out_dir, dirs_exist_ok=True)
-    (out_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, separators=(",", ":")))
+    shutil.rmtree(out_dir / "companies", ignore_errors=True)  # drop companies no longer followed
+    for rel, data in files.items():
+        path = out_dir / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
 
 
 def run(
@@ -115,9 +120,9 @@ def run(
     if any(views.values()):
         store.save_pageviews({**store.load_pageviews(), **{k: v for k, v in views.items() if v}})
 
-    summary = build_summary(
+    files = build_outputs(
         companies, store.load(WINDOW_DAYS + 1, now=now), store.load_pageviews(), backend.name, now=now
     )
-    publish(summary, out_dir)
+    publish(files, out_dir)
     log.info("collected %d, kept %d, stored %d new, pruned %d day files", *vars(stats).values())
     return stats
