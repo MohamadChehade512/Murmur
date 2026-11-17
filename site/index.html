@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Murmur | Live media monitoring</title>
-<meta name="description" content="What people say about big companies across news, Hacker News and Bluesky, in English and Arabic. Updated hourly.">
+<meta name="description" content="What people say about big companies across news, Hacker News and Bluesky, in English and Arabic. Search any of them and compare. Updated through the day.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 :root {
@@ -18,22 +18,58 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 a { color: inherit; }
+button { font: inherit; color: inherit; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 16px 64px; }
-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.02em; display: flex; align-items: center; gap: 12px; }
 h1 svg { flex: none; }
 .lede { margin: 6px 0 0; color: var(--ink-2); max-width: 62ch; }
-.status { font-size: 13px; color: var(--muted); text-align: right; }
+.status { font-size: 13px; color: var(--muted); text-align: right; margin: 0; }
 .status b { color: var(--ink); font-weight: 600; }
 .live { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--pos); margin-right: 6px; box-shadow: 0 0 0 0 var(--pos); animation: pulse 2.4s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pos) 60%, transparent); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
 @media (prefers-reduced-motion: reduce) { .live { animation: none; } }
 
+/* ---------- search ---------- */
+.finder { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; }
+.finder label { display: block; font-weight: 650; font-size: 17px; margin-bottom: 10px; }
+.search { position: relative; }
+.search input { width: 100%; font: inherit; font-size: 17px; padding: 13px 16px 13px 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.search > svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.results { list-style: none; margin: 6px 0 0; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); position: absolute; inset-inline: 0; z-index: 5; box-shadow: 0 10px 28px rgb(0 0 0 / .1); max-height: 360px; overflow: auto; }
+.results li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 15px; }
+.results li[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.results small { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.results .none { cursor: default; color: var(--muted); }
+.suggest { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 5px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; font-size: 13px; color: var(--ink); }
+.chip:hover { border-color: var(--muted); }
+
+/* ---------- company identity ---------- */
+.badge { --size: 28px; flex: none; width: var(--size); height: var(--size); border-radius: 8px; display: inline-grid; place-items: center; background: var(--c); color: var(--on); font: 700 calc(var(--size) * 0.4)/1 system-ui, sans-serif; letter-spacing: -0.02em; }
+.badge.sm { --size: 22px; border-radius: 6px; }
+.badge.lg { --size: 40px; border-radius: 11px; }
+
+/* ---------- view bar ---------- */
+.viewbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 0 0 14px; }
+.viewbar h2 { margin: 0; font-size: 18px; }
+.viewbar .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { padding: 7px 13px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 14px; }
+.btn:hover { border-color: var(--muted); }
+.compare-add { min-width: min(300px, 100%); }
+.compare-add input { font-size: 14px; padding: 7px 12px; border-radius: 10px; background: var(--panel); }
+
+/* ---------- cards ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 16px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.card h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; }
-.dot { width: 12px; height: 12px; border-radius: 4px; background: var(--c); }
-.headline-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 18px; min-width: 0; animation: rise .35s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card, .compare { animation: none; } }
+.ident { display: flex; align-items: center; gap: 12px; }
+.ident h2 { margin: 0; font-size: 21px; line-height: 1.15; }
+.ident .sector { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+.ident .remove { margin-left: auto; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; padding: 4px 6px; border-radius: 6px; }
+.ident .remove:hover { color: var(--ink); background: var(--bg); }
 .count { font-size: 13px; color: var(--muted); }
 .count b { font-size: 22px; color: var(--ink); font-weight: 650; margin-right: 4px; }
 h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
@@ -55,22 +91,20 @@ h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
 .news a { text-decoration: none; font-size: 14px; display: block; overflow-wrap: anywhere; }
 .news a:hover { text-decoration: underline; }
 .news small { color: var(--muted); font-size: 12px; }
-.mix { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-2); }
+.mix { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-2); margin: 0; }
+
+/* ---------- comparison ---------- */
+.compare { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 16px; display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); animation: rise .35s ease both; }
+.crow { display: grid; grid-template-columns: minmax(110px, 160px) 1fr; gap: 6px 12px; align-items: center; margin-bottom: 10px; font-size: 13px; }
+.crow .who { display: flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
+.crow .who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track { display: flex; align-items: center; gap: 8px; }
+.track .fill { height: 12px; border-radius: 6px; background: var(--c); min-width: 2px; }
+.num { color: var(--ink-2); white-space: nowrap; }
+.track .bar { flex: 1; }
 
 footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
 footer p { margin: 0; max-width: 72ch; }
-.lookup { margin-top: 40px; }
-.lookup h2 { margin: 0 0 4px; font-size: 22px; }
-.lookup > p { margin: 0 0 14px; color: var(--ink-2); }
-.search { position: relative; max-width: 520px; margin-bottom: 16px; }
-.search input { width: 100%; font: inherit; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
-.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-.results { list-style: none; margin: 6px 0 0; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); position: absolute; inset-inline: 0; z-index: 2; box-shadow: 0 8px 24px rgb(0 0 0 / .08); }
-.results li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
-.results li[aria-selected="true"], .results li:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.results small { margin-left: auto; color: var(--muted); font-size: 12px; }
-.results .none { cursor: default; color: var(--muted); }
-.lookup .card { max-width: 640px; }
 .error { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
 </style>
 </head>
@@ -82,22 +116,24 @@ footer p { margin: 0; max-width: 72ch; }
         <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#5b4bff"/><path d="M7 19c2-5 4-5 6 0s4 5 6 0 4-5 6 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="25" cy="10" r="2.4" fill="#fff"/></svg>
         Murmur
       </h1>
-      <p class="lede">What people are saying about big companies across the news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised every hour.</p>
+      <p class="lede">What people are saying about big companies across the news, Hacker News and Bluesky, in English and Arabic. Collected, scored and summarised through the day.</p>
     </div>
     <p class="status" id="status">Loading…</p>
   </header>
 
-  <main id="app" class="grid" aria-live="polite"></main>
-
-  <section class="lookup" id="lookup" hidden>
-    <h2>Look up a company</h2>
-    <p id="lookup-count"></p>
+  <section class="finder" id="finder" hidden>
+    <label for="q" id="q-label">Search companies</label>
     <div class="search">
-      <input id="q" type="search" autocomplete="off" placeholder="Try Nvidia, Shopify or Deloitte" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list" aria-label="Company name">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list">
       <ul id="results" class="results" role="listbox" hidden></ul>
     </div>
-    <div id="picked" aria-live="polite"></div>
+    <div class="suggest" id="suggest"></div>
   </section>
+
+  <div class="viewbar" id="viewbar"></div>
+  <div id="compare"></div>
+  <main id="app" class="grid" aria-live="polite"></main>
 
   <footer>
     <p>An open-source project by <a href="https://github.com/MohamadChehade512">Mohamad Chehade</a>. Built to show how media monitoring works. It is not affiliated with any of the companies shown. Sentiment is automated and approximate. Only links, scores and keywords are stored, never copies of people's posts.</p>
@@ -106,16 +142,25 @@ footer p { margin: 0; max-width: 72ch; }
 </div>
 
 <script>
+const MAX_COMPARE = 3;
+const SUGGESTIONS = ['nvidia', 'microsoft', 'shopify', 'deloitte', 'aramco', 'rbc'];
 const fmt = new Intl.NumberFormat('en');
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'style') n.style.cssText = v; else if (v !== false && v != null) n.setAttribute(k, v);
+    if (k === 'style') n.style.cssText = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) n.setAttribute(k, v);
   }
   for (const k of kids.flat()) if (k != null) n.append(k.nodeType ? k : document.createTextNode(k));
   return n;
 };
-const svg = (markup, vb) => { const d = el('div', { class: 'chart' }); d.innerHTML = `<svg viewBox="${vb}" role="presentation">${markup}</svg>`; return d; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+const svg = (markup, vb, label) => {
+  const d = el('div', { class: 'chart' });
+  d.innerHTML = `<svg viewBox="${vb}" ${label ? `role="img" aria-label="${esc(label)}"` : 'aria-hidden="true"'}>${markup}</svg>`;
+  return d;
+};
 const ago = (iso) => {
   const mins = Math.round((Date.now() - new Date(iso)) / 60000);
   if (mins < 1) return 'just now';
@@ -123,17 +168,32 @@ const ago = (iso) => {
   const h = Math.round(mins / 60);
   return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
 };
+const pct = (x) => `${Math.round(x * 100)}%`;
+const weekday = (date) => new Date(date + 'T12:00:00Z').toLocaleDateString('en', { weekday: 'short', timeZone: 'UTC' });
 
+// ---------- identity: a coloured badge with the company's initials ----------
+function onColor(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [n >> 16, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.179 ? '#111111' : '#ffffff'; // whichever contrasts more
+}
+function initials(name) {
+  if (name.length <= 4 && !name.includes(' ')) return name; // IBM, AMD, e&, PwC
+  const words = name.replace(/[^\p{L}\p{N}\s-]/gu, '').split(/[\s-]+/).filter(Boolean);
+  return words.length > 1 ? (words[0][0] + words[1][0]).toUpperCase() : name[0].toUpperCase() + name[1];
+}
+const badge = (c, size = '') => el('span', { class: `badge ${size}`, style: `--c:${c.color};--on:${onColor(c.color)}`, 'aria-hidden': 'true' }, initials(c.name));
+
+// ---------- one company's card ----------
 function dailyChart(c) {
   const W = 320, H = 110, pad = 18, n = c.daily.length, bw = (W - (n - 1) * 6) / n;
   const max = Math.max(1, ...c.daily.map((d) => d.mentions));
   const bars = c.daily.map((d, i) => {
     const x = i * (bw + 6), hEn = (d.en / max) * (H - pad), hAr = (d.ar / max) * (H - pad), hOt = (d.other / max) * (H - pad);
-    const day = new Date(d.date + 'T12:00:00Z').toLocaleDateString('en', { weekday: 'short' });
     return `<rect x="${x}" y="${H - hEn}" width="${bw}" height="${hEn}" rx="3" fill="${c.color}"><title>${d.date}: ${d.mentions} mentions</title></rect>
       <rect x="${x}" y="${H - hEn - hAr}" width="${bw}" height="${hAr}" rx="3" fill="${c.color}" opacity=".45"/>
       <rect x="${x}" y="${H - hEn - hAr - hOt}" width="${bw}" height="${hOt}" rx="3" fill="var(--neu)"/>
-      <text x="${x + bw / 2}" y="${H + 14}" text-anchor="middle" font-size="10" fill="var(--muted)">${day}</text>`;
+      <text x="${x + bw / 2}" y="${H + 14}" text-anchor="middle" font-size="10" fill="var(--muted)">${weekday(d.date)}</text>`;
   }).join('');
   return svg(bars, `0 0 ${W} ${H + 16}`);
 }
@@ -156,19 +216,23 @@ function terms(list, rtl) {
   return el('ul', { class: 'terms', dir: rtl ? 'rtl' : null, lang: rtl ? 'ar' : 'en' }, list.map((t) => el('li', {}, t.term, el('small', {}, String(t.count)))));
 }
 
-function company(c, prefix = 'h') {
-  const s = c.sentiment, t = c.totals;
+function sentimentBar(s) {
+  return el('div', { class: 'bar', role: 'img', 'aria-label': `${pct(s.positive)} positive, ${pct(s.neutral)} neutral, ${pct(s.negative)} negative` },
+    el('span', { style: `width:${s.positive * 100}%;background:var(--pos)` }),
+    el('span', { style: `width:${s.neutral * 100}%;background:var(--neu)` }),
+    el('span', { style: `width:${s.negative * 100}%;background:var(--neg)` }));
+}
+
+function card(c, { sector, removable } = {}) {
+  const s = c.sentiment, t = c.totals, hid = `h-${c.id}`;
   const sentiment = s.scored
-    ? [el('div', { class: 'bar', role: 'img', 'aria-label': `${Math.round(s.positive * 100)}% positive, ${Math.round(s.neutral * 100)}% neutral, ${Math.round(s.negative * 100)}% negative` },
-        el('span', { style: `width:${s.positive * 100}%;background:var(--pos)` }),
-        el('span', { style: `width:${s.neutral * 100}%;background:var(--neu)` }),
-        el('span', { style: `width:${s.negative * 100}%;background:var(--neg)` })),
-       el('div', { class: 'sent-labels' }, el('span', {}, `${Math.round(s.positive * 100)}% positive`), el('span', {}, `${Math.round(s.negative * 100)}% negative`))]
+    ? [sentimentBar(s), el('div', { class: 'sent-labels' }, el('span', {}, `${pct(s.positive)} positive`), el('span', {}, `${pct(s.negative)} negative`))]
     : [el('p', { class: 'empty' }, 'No scored mentions yet.')];
-  return el('section', { class: 'card', style: `--c:${c.color}`, 'aria-labelledby': `${prefix}-${c.id}` },
-    el('div', { class: 'headline-row' },
-      el('h2', { id: `${prefix}-${c.id}` }, el('span', { class: 'dot' }), c.name),
-      el('span', { class: 'count' }, el('b', {}, fmt.format(t.mentions)), 'mentions, 7 days')),
+  return el('section', { class: 'card', style: `--c:${c.color}`, 'aria-labelledby': hid },
+    el('div', { class: 'ident' }, badge(c, 'lg'),
+      el('div', {}, el('h2', { id: hid }, c.name), sector ? el('span', { class: 'sector' }, sector) : null),
+      removable ? el('button', { class: 'remove', type: 'button', 'aria-label': `Remove ${c.name}`, title: `Remove ${c.name}`, onclick: () => remove(c.id) }, '×') : null),
+    el('div', { class: 'count' }, el('b', {}, fmt.format(t.mentions)), 'mentions in the last 7 days'),
     el('div', {}, el('h3', {}, 'Mentions per day'), dailyChart(c),
       el('div', { class: 'legend' }, el('span', {}, el('i', { style: `background:${c.color}` }), `English ${fmt.format(t.by_lang.en)}`),
         el('span', {}, el('i', { style: `background:${c.color};opacity:.45` }), `Arabic ${fmt.format(t.by_lang.ar)}`),
@@ -187,98 +251,181 @@ function company(c, prefix = 'h') {
       : el('p', { class: 'empty' }, 'No headlines yet.')));
 }
 
-async function load() {
-  const status = document.getElementById('status'), app = document.getElementById('app');
-  try {
-    const res = await fetch('summary.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    app.replaceChildren(...data.companies.map(company));
-    status.replaceChildren(el('span', { class: 'live' }), 'Updated ', el('b', {}, ago(data.generated_at)), `, sentiment by ${data.sentiment_backend === 'model' ? 'multilingual model' : 'English lexicon'}`);
-  } catch (e) {
-    app.replaceChildren(el('div', { class: 'error' }, 'The latest data could not be loaded. It refreshes every hour, so try again shortly.'));
-    status.textContent = '';
-  }
-}
-// ---------- look up any company ----------
-const norm = (x) => x.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g, '');
-let index = [], active = -1, matches = [];
+// ---------- side by side ----------
+function compareView(list) {
+  const W = 360, H = 120, n = list[0].daily.length, max = Math.max(1, ...list.flatMap((c) => c.daily.map((d) => d.mentions)));
+  const x = (i) => (n > 1 ? (i / (n - 1)) * W : W / 2), y = (v) => H - (v / max) * (H - 6);
+  const lines = list.map((c) => {
+    const d = c.daily.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.mentions).toFixed(1)}`).join(' ');
+    return `<path d="${d}" fill="none" stroke="${c.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` +
+      c.daily.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.mentions)}" r="3" fill="${c.color}"><title>${esc(c.name)}, ${p.date}: ${p.mentions}</title></circle>`).join('');
+  }).join('');
+  const labels = list[0].daily.map((p, i) => `<text x="${x(i)}" y="${H + 16}" text-anchor="middle" font-size="10" fill="var(--muted)">${weekday(p.date)}</text>`).join('');
+  const label = `Mentions per day: ${list.map((c) => `${c.name} ${c.daily.map((d) => d.mentions).join(', ')}`).join('; ')}`;
+  const most = Math.max(1, ...list.map((c) => c.totals.mentions));
+  const who = (c) => el('div', { class: 'who' }, badge(c, 'sm'), el('span', {}, c.name));
 
-function search(q) {
+  return el('section', { class: 'compare', 'aria-label': 'Comparison' },
+    el('div', {}, el('h3', {}, 'Mentions per day'), svg(`${lines}${labels}`, `-6 -6 ${W + 12} ${H + 24}`, label),
+      el('div', { class: 'legend' }, list.map((c) => el('span', {}, el('i', { style: `background:${c.color}` }), c.name)))),
+    el('div', {},
+      el('h3', {}, 'Mentions this week'),
+      list.map((c) => el('div', { class: 'crow', style: `--c:${c.color}` }, who(c),
+        el('div', { class: 'track' }, el('span', { class: 'fill', style: `width:${(c.totals.mentions / most) * 75}%` }), el('span', { class: 'num' }, fmt.format(c.totals.mentions))))),
+      el('h3', { style: 'margin-top:18px' }, 'How people feel'),
+      list.map((c) => el('div', { class: 'crow' }, who(c),
+        c.sentiment.scored
+          ? el('div', { class: 'track' }, sentimentBar(c.sentiment), el('span', { class: 'num' }, `${pct(c.sentiment.positive)} positive`))
+          : el('span', { class: 'empty' }, 'Not scored yet'))),
+      el('h3', { style: 'margin-top:18px' }, 'Where it’s discussed'),
+      list.map((c) => {
+        const s = c.totals.by_source, total = Math.max(1, s.news + s.hn + s.bluesky);
+        return el('div', { class: 'crow' }, who(c), el('span', { class: 'num' },
+          `News ${pct(s.news / total)}, Hacker News ${pct(s.hn / total)}, Bluesky ${pct(s.bluesky / total)}`));
+      })));
+}
+
+// ---------- state ----------
+let summary = null, index = [], selected = [];
+const cache = new Map();
+const entry = (id) => index.find((c) => c.id === id);
+
+function companyData(id) {
+  if (!cache.has(id)) {
+    const p = fetch(`companies/${encodeURIComponent(id)}.json`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
+      .then((f) => f.company);
+    p.catch(() => cache.delete(id));
+    cache.set(id, p);
+  }
+  return cache.get(id);
+}
+
+function setHash() { history.replaceState(null, '', selected.length ? `#${selected.join(',')}` : location.pathname); }
+function show(ids) { selected = ids.slice(0, MAX_COMPARE); setHash(); render(); }
+function remove(id) { show(selected.filter((x) => x !== id)); }
+function add(id) { if (!selected.includes(id)) show([...selected, id]); }
+
+async function render() {
+  const app = document.getElementById('app'), bar = document.getElementById('viewbar'), cmp = document.getElementById('compare');
+  if (!selected.length) {
+    bar.replaceChildren(index.length ? el('h2', {}, 'Featured') : '');
+    cmp.replaceChildren();
+    app.replaceChildren(...(summary?.companies ?? []).map((c) => card(c, { sector: entry(c.id)?.sector })));
+    return;
+  }
+  const names = selected.map((id) => entry(id)?.name ?? id);
+  bar.replaceChildren(
+    el('h2', {}, names.join(' vs ')),
+    el('div', { class: 'actions' },
+      selected.length < MAX_COMPARE
+        ? combo({ id: 'c', placeholder: selected.length === 1 ? 'Compare with…' : 'Add one more…', label: 'Add a company to compare', onPick: add, exclude: selected })
+        : null,
+      el('button', { class: 'btn', type: 'button', onclick: () => { document.getElementById('q').value = ''; show([]); } }, 'Back to featured')));
+  app.replaceChildren(el('p', { class: 'empty' }, `Loading ${names.join(', ')}…`));
+  const want = selected.join(',');
+  const results = await Promise.allSettled(selected.map(companyData));
+  if (selected.join(',') !== want) return; // the selection changed while loading
+  const ok = results.filter((r) => r.status === 'fulfilled').map((r) => r.value);
+  cmp.replaceChildren(ok.length > 1 ? compareView(ok) : '');
+  app.replaceChildren(...ok.map((c) => card(c, { sector: entry(c.id)?.sector, removable: selected.length > 1 })),
+    ...(ok.length < results.length ? [el('p', { class: 'empty' }, 'Some companies could not be loaded. Try again shortly.')] : []));
+}
+
+// ---------- search boxes (the main search and "compare with") ----------
+const norm = (x) => x.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9؀-ۿ]+/g, '');
+function search(q, exclude = []) {
   const k = norm(q);
   if (!k) return [];
   const score = (c) => {
     const names = [c.name, ...c.known_as].map(norm);
-    if (names.some((n) => n === k)) return 0;
+    if (names.includes(k)) return 0;
     if (names.some((n) => n.startsWith(k))) return 1;
     if (names.some((n) => n.includes(k))) return 2;
     return norm(c.sector).startsWith(k) ? 3 : 9;
   };
-  return index.map((c) => [score(c), c]).filter(([s]) => s < 9).sort((a, b) => a[0] - b[0] || b[1].mentions - a[1].mentions).slice(0, 8).map(([, c]) => c);
+  return index.filter((c) => !exclude.includes(c.id)).map((c) => [score(c), c]).filter(([s]) => s < 9)
+    .sort((a, b) => a[0] - b[0] || b[1].mentions - a[1].mentions).slice(0, 8).map(([, c]) => c);
 }
 
-function showResults() {
-  const q = document.getElementById('q'), list = document.getElementById('results');
-  matches = search(q.value);
-  active = matches.length ? 0 : -1;
-  if (!q.value.trim()) { list.hidden = true; q.setAttribute('aria-expanded', 'false'); return; }
-  list.replaceChildren(...(matches.length
-    ? matches.map((c, i) => el('li', { role: 'option', id: `opt-${c.id}`, 'aria-selected': String(i === active), 'data-id': c.id },
-        el('span', { class: 'dot', style: `--c:${c.color}` }), c.name, el('small', {}, `${c.sector}, ${fmt.format(c.mentions)} mentions`)))
-    : [el('li', { class: 'none' }, 'Not tracked yet. Murmur follows the companies listed in companies.toml on GitHub.')]));
-  list.hidden = false;
-  q.setAttribute('aria-expanded', 'true');
-  q.setAttribute('aria-activedescendant', active >= 0 ? `opt-${matches[active].id}` : '');
+function wire(input, list, onPick, exclude = []) {
+  let matches = [], active = -1;
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); };
+  const mark = () => {
+    [...list.children].forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
+    if (active >= 0) input.setAttribute('aria-activedescendant', `${list.id}-${matches[active].id}`);
+  };
+  const choose = (c) => { close(); onPick(c.id); };
+  input.addEventListener('input', () => {
+    matches = search(input.value, exclude);
+    active = matches.length ? 0 : -1;
+    if (!input.value.trim()) return close();
+    list.replaceChildren(...(matches.length
+      ? matches.map((c, i) => el('li', { role: 'option', id: `${list.id}-${c.id}`, 'aria-selected': String(i === active), onmousedown: (e) => { e.preventDefault(); choose(c); }, onmouseenter: () => { active = i; mark(); } },
+          badge(c, 'sm'), c.name, el('small', {}, `${c.sector}, ${fmt.format(c.mentions)} this week`)))
+      : [el('li', { class: 'none' }, 'Not followed yet. The list of companies lives in companies.toml on GitHub.')]));
+    list.hidden = false;
+    input.setAttribute('aria-expanded', String(matches.length > 0));
+    mark();
+  });
+  input.addEventListener('keydown', (e) => {
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && matches.length) {
+      e.preventDefault();
+      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length;
+      mark();
+    } else if (e.key === 'Enter' && active >= 0 && !list.hidden) {
+      e.preventDefault(); choose(matches[active]);
+    } else if (e.key === 'Escape') close();
+  });
+  input.addEventListener('blur', close);
 }
 
-async function pick(id) {
-  const q = document.getElementById('q'), list = document.getElementById('results'), out = document.getElementById('picked');
-  const c = index.find((x) => x.id === id);
-  if (!c) return;
-  q.value = c.name; list.hidden = true; q.setAttribute('aria-expanded', 'false');
-  out.replaceChildren(el('p', { class: 'empty' }, `Loading ${c.name}…`));
+function combo({ id, placeholder, label, onPick, exclude }) {
+  const input = el('input', { id: `${id}-input`, type: 'search', autocomplete: 'off', spellcheck: 'false', placeholder, 'aria-label': label, role: 'combobox', 'aria-expanded': 'false', 'aria-controls': `${id}-list`, 'aria-autocomplete': 'list' });
+  const list = el('ul', { id: `${id}-list`, class: 'results', role: 'listbox', hidden: '' });
+  wire(input, list, onPick, exclude);
+  return el('div', { class: 'compare-add search' }, input, list);
+}
+
+// ---------- start ----------
+async function load() {
+  const status = document.getElementById('status');
   try {
-    const res = await fetch(`companies/${encodeURIComponent(id)}.json`, { cache: 'no-store' });
+    const res = await fetch('summary.json', { cache: 'no-store' });
     if (!res.ok) throw new Error(res.status);
-    out.replaceChildren(company((await res.json()).company, 'lookup'));
-    history.replaceState(null, '', `#${id}`);
+    summary = await res.json();
+    for (const c of summary.companies) cache.set(c.id, Promise.resolve(c));
+    status.replaceChildren(el('span', { class: 'live' }), 'Updated ', el('b', {}, ago(summary.generated_at)), `, sentiment by ${summary.sentiment_backend === 'model' ? 'multilingual model' : 'English lexicon'}`);
   } catch {
-    out.replaceChildren(el('p', { class: 'empty' }, `${c.name} could not be loaded. Try again shortly.`));
+    document.getElementById('app').replaceChildren(el('div', { class: 'error' }, 'The latest data could not be loaded. It refreshes through the day, so try again shortly.'));
+    status.textContent = '';
   }
 }
 
-async function setupLookup() {
+async function setupSearch() {
   try {
     const res = await fetch('index.json', { cache: 'no-store' });
     if (!res.ok) return;
     index = (await res.json()).companies;
   } catch { return; }
-  const q = document.getElementById('q'), list = document.getElementById('results');
-  document.getElementById('lookup-count').textContent = `Murmur follows ${index.length} companies. Search by name, another name, or sector.`;
-  document.getElementById('lookup').hidden = false;
-  q.addEventListener('input', showResults);
-  q.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      if (!matches.length) return;
-      e.preventDefault();
-      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length;
-      [...list.children].forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
-      q.setAttribute('aria-activedescendant', `opt-${matches[active].id}`);
-    } else if (e.key === 'Enter' && active >= 0) {
-      e.preventDefault(); pick(matches[active].id);
-    } else if (e.key === 'Escape') {
-      list.hidden = true; q.setAttribute('aria-expanded', 'false');
-    }
-  });
-  list.addEventListener('mousedown', (e) => { const li = e.target.closest('[data-id]'); if (li) { e.preventDefault(); pick(li.dataset.id); } });
-  q.addEventListener('blur', () => { list.hidden = true; q.setAttribute('aria-expanded', 'false'); });
-  const hash = decodeURIComponent(location.hash.slice(1));
-  if (hash && index.some((c) => c.id === hash)) pick(hash);
+  const q = document.getElementById('q');
+  document.getElementById('q-label').textContent = `Search ${index.length} companies`;
+  q.placeholder = 'Company name, another name, or sector';
+  wire(q, document.getElementById('results'), (id) => { q.value = entry(id)?.name ?? ''; show([id]); });
+  q.addEventListener('input', () => { if (!q.value && selected.length) show([]); }); // clearing the box goes back
+  const picks = SUGGESTIONS.map(entry).filter(Boolean);
+  document.getElementById('suggest').replaceChildren(el('span', {}, 'Try'),
+    ...picks.map((c) => el('button', { class: 'chip', type: 'button', onclick: () => { q.value = c.name; show([c.id]); } }, badge(c, 'sm'), c.name)));
+  document.getElementById('finder').hidden = false;
 }
 
-load();
-setupLookup();
-setInterval(load, 10 * 60 * 1000);
+(async () => {
+  await Promise.all([load(), setupSearch()]);
+  const fromHash = decodeURIComponent(location.hash.slice(1)).split(',').filter((id) => entry(id));
+  if (fromHash.length) { document.getElementById('q').value = entry(fromHash[0]).name; show(fromHash); } else render();
+})();
+// Refresh the numbers now and then without disturbing a search in progress.
+setInterval(async () => { await load(); if (!selected.length) render(); }, 10 * 60 * 1000);
 </script>
 </body>
 </html>
