@@ -22,6 +22,9 @@ class Company:
     wikipedia: str | None = None
     exclude: tuple[str, ...] = ()
     headlines: dict[str, str] = field(default_factory=dict)
+    sector: str = ""
+    featured: bool = False
+    known_as: tuple[str, ...] = ()
 
 
 @dataclass
